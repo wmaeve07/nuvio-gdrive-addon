@@ -227,12 +227,13 @@ async function handleRequest(request, env) {
     if (url.pathname === "/manifest.json" || url.pathname === "/") {
         const manifest = {
             id: "nuvio.gdrive.worker.v1",
-            version: "1.1.0",
+            version: "1.2.0",
             name: CONFIG.addonName,
             description: "Stream your files directly from Google Drive on Nuvio!",
             catalogs: [
-                // --- FEATURE 2: Recently Added Catalog ---
-                { type: "movie", id: "gdrive_recent", name: "Recently Added" },
+                // --- FEATURE 2: Recently Added Catalogs (Split for compatibility) ---
+                { type: "movie", id: "gdrive_recent_movies", name: "Recently Added Movies" },
+                { type: "series", id: "gdrive_recent_series", name: "Recently Added Series" },
                 { type: "movie", id: "gdrive_search", name: "GDrive Search", extra: [{ name: "search", isRequired: true }] }
             ],
             resources: [
@@ -345,18 +346,49 @@ async function handleRequest(request, env) {
             const catalogId = catalogMatch[2];
             const searchTerm = catalogMatch[4] ? decodeURIComponent(catalogMatch[4]) : "";
             
-            if (catalogId === "gdrive_recent") {
-                // --- FEATURE 2: Recently Added Logic ---
+            if (catalogId === "gdrive_recent_movies") {
                 const query = `trashed=false and mimeType contains 'video/' and not name contains 'trailer' and not name contains 'sample'`;
                 const { files } = await fetchFiles(query, env, "createdTime desc");
                 
-                const metas = files.slice(0, 50).map(f => {
+                // Filter only movies (files without S01E01 pattern)
+                const movies = files.filter(f => {
+                    const parsed = parseFile(f);
+                    return parsed.type === "movie";
+                }).slice(0, 50);
+                
+                const metas = movies.map(f => {
                     const parsed = parseFile(f);
                     return {
                         id: `gdrive:${f.id}`,
                         name: parsed.name,
-                        type: parsed.type,
-                        posterShape: parsed.type === "series" ? "poster" : "landscape",
+                        type: "movie",
+                        posterShape: "landscape",
+                        poster: f.thumbnailLink || "",
+                        background: f.thumbnailLink || "",
+                        description: `Size: ${parsed.formattedSize}\nQuality: ${parsed.quality}\nResolution: ${parsed.resolution}`,
+                        released: f.createdTime ? new Date(f.createdTime).toISOString() : undefined,
+                    };
+                });
+                return new Response(JSON.stringify({ metas }), { headers: HEADERS });
+            }
+
+            if (catalogId === "gdrive_recent_series") {
+                const query = `trashed=false and mimeType contains 'video/' and not name contains 'trailer' and not name contains 'sample'`;
+                const { files } = await fetchFiles(query, env, "createdTime desc");
+                
+                // Filter only series (files with S01E01 pattern)
+                const series = files.filter(f => {
+                    const parsed = parseFile(f);
+                    return parsed.type === "series";
+                }).slice(0, 50);
+                
+                const metas = series.map(f => {
+                    const parsed = parseFile(f);
+                    return {
+                        id: `gdrive:${f.id}`,
+                        name: parsed.name,
+                        type: "series",
+                        posterShape: "poster",
                         poster: f.thumbnailLink || "",
                         background: f.thumbnailLink || "",
                         description: `Size: ${parsed.formattedSize}\nQuality: ${parsed.quality}\nResolution: ${parsed.resolution}`,
@@ -399,16 +431,21 @@ async function handleRequest(request, env) {
             const fullId = decodeURIComponent(streamMatch[2]);
             
             if (fullId.startsWith("gdrive:")) {
-                const fileId = fullId.replace("gdrive:", "");
-                const accessToken = await getAccessToken(env);
-                const file = await fetchFile(fileId, env);
+    // Extract just the file ID (remove :season:episode if present)
+    let fileId = fullId.replace("gdrive:", "");
+    if (fileId.includes(":")) {
+        fileId = fileId.split(":")[0];
+    }
+    
+    const accessToken = await getAccessToken(env);
+    const file = await fetchFile(fileId, env);
                 
                 if (!file) {
                     return new Response(JSON.stringify({ streams: [] }), { headers: HEADERS });
                 }
                 
                 const parsed = parseFile(file);
-                const desc = ` ${parsed.quality} | 📺 ${parsed.visualTags.join(", ") || "SD"} | 📦 ${parsed.formattedSize}\n📄 ${parsed.name}`;
+                const desc = `🎥 ${parsed.quality} | 📺 ${parsed.visualTags.join(", ") || "SD"} | 📦 ${parsed.formattedSize}\n📄 ${parsed.name}`;
                 
                 const stream = {
                     name: `[⚡] ${CONFIG.addonName} ${parsed.resolution}`,
@@ -465,7 +502,7 @@ async function handleRequest(request, env) {
 
             const streams = files.map(file => {
                 const parsed = parseFile(file);
-                const desc = ` ${parsed.quality} | 📺 ${parsed.visualTags.join(", ") || "SD"} |  ${parsed.formattedSize}\n📄 ${parsed.name}`;
+                const desc = `🎥 ${parsed.quality} | 📺 ${parsed.visualTags.join(", ") || "SD"} | 📦 ${parsed.formattedSize}\n📄 ${parsed.name}`;
                 
                 return {
                     name: `[⚡] ${CONFIG.addonName} ${parsed.resolution}`,
