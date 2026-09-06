@@ -1,3 +1,5 @@
+# 🚀 [Click Here for the Easy Setup Wizard](https://wmaeve07.github.io/nuvio-gdrive-addon/setup.html)
+
 # Nuvio GDrive Cloudflare Worker Addon
 
 A high-performance Nuvio addon that streams video files directly from your Google Drive (including Shared Drives and Shared with Me files). 
