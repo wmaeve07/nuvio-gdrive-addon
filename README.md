@@ -1,65 +1,54 @@
-# 🚀 [Click Here for the Easy Setup Wizard](https://wmaeve07.github.io/nuvio-gdrive-addon/setup.html)
+# 🚀 [Click Here for the 1-Click Easy Setup Wizard](https://wmaeve07.github.io/nuvio-gdrive-addon/setup.html)
+
+*(Highly Recommended: The wizard automatically generates your custom code and guides you step-by-step!)*
+
+---
 
 # Nuvio GDrive Cloudflare Worker Addon
 
-A high-performance Nuvio addon that streams video files directly from your Google Drive (including Shared Drives and Shared with Me files). 
+A high-performance addon that streams video files directly from your Google Drive (including Shared Drives and Shared with Me files). It runs 24/7 in the cloud, requires no local server, and handles authentication automatically for zero-buffering playback on Nuvio, Stremio, and external players.
 
-This addon is designed to be deployed as a **Cloudflare Worker**, meaning it runs 24/7 in the cloud, requires no local server, and handles authentication headers automatically so it works flawlessly on Nuvio without buffering.
-
-## Features
+## ✨ Features
 - **Zero Buffering:** Proxied playback through Cloudflare ensures smooth streaming.
-- **Universal Compatibility:** Works perfectly on Nuvio, Stremio, and external players.
-- **Wide Search:** Finds files regardless of folder structure. Supports standard naming conventions (e.g., `Movie.Name.2023.1080p.mkv` or `Show.Name.S01E01.mkv`).
+- **Universal Compatibility:** Works perfectly on Nuvio, Stremio (Desktop/Web), and external players.
+- **Smart Search:** Finds files regardless of folder structure. Supports standard naming (e.g., `Movie.Name.2023.1080p.mkv` or `Show.Name.S01E01.mkv`).
 - **Shared Drives:** Automatically scans your personal Drive, Shared Drives, and files shared with you.
-- **Secure:** Your Google credentials are stored securely as encrypted Environment Variables in Cloudflare.
 
-## Prerequisites
-Before deploying, you need to generate your own Google Cloud credentials. This is required to allow the addon to access your specific Google Drive.
+## ❓ FAQ & Troubleshooting
+<details>
+<summary><strong>⚠️ I'm getting an "Access Blocked" or "invalid_client" error!</strong></summary>
+You missed the <strong>Test User</strong> step. Google blocks all apps by default unless you explicitly add your Gmail address to the "Test Users" list in the Google Cloud Console. Please redo Step 1 in the Setup Wizard carefully.
+</details>
 
-### Step 1: Get Google Cloud Credentials
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a **New Project**.
-3. Go to **APIs & Services > Library**, search for **Google Drive API**, and click **Enable**.
-4. Go to **APIs & Services > Credentials**.
-5. Click **Create Credentials > OAuth client ID**.
-   - Application type: **Web application**
-   - Name: `Nuvio GDrive`
-   - Under **Authorized redirect URIs**, click **Add URI** and paste: `https://developers.google.com/oauthplayground`
-   - Click **Create**.
-6. Copy your **Client ID** and **Client Secret** and save them somewhere safe.
+<details>
+<summary><strong>🎬 My files aren't showing up in the search!</strong></summary>
+Ensure your files are named correctly. The addon looks for standard naming conventions:
+- Movies: <code>Movie Name (2023).mkv</code> or <code>Movie.Name.2023.1080p.mp4</code>
+- Series: <code>Show.Name.S01E01.mkv</code> or <code>Show.Name.1x01.mp4</code>
+</details>
 
-### Step 2: Get your Refresh Token
-1. Go to the [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground/).
-2. Click the **Gear icon (⚙️)** in the top right.
-3. Check **"Use your own OAuth credentials"** and paste your Client ID and Client Secret. Close settings.
-4. On the left, expand **Drive API v3** and check `https://www.googleapis.com/auth/drive.readonly`.
-5. Click **Authorize APIs**, select your Google account, and allow access.
-6. Click **Exchange authorization code for tokens**.
-7. Copy the **Refresh token**.
+<details>
+<summary><strong>🔄 How do I update the addon if I add new files?</strong></summary>
+You don't need to do anything! The addon queries your Google Drive in real-time. New files will appear automatically within 15 minutes (due to caching).
+</details>
 
-## Deployment (Cloudflare Workers)
+---
 
-1. Go to [Cloudflare Workers](https://dash.cloudflare.com/?to=/:account/workers) and log in (free account).
-2. Click **Create Application > Create Worker**. Name it `nuvio-gdrive` and click **Deploy**.
-3. Click **Edit Code**.
-4. Delete the default code, and paste the contents of `index.js` from this repository.
-5. Click **Save and Deploy**.
-6. Go to the **Settings** tab (top right), then click **Variables** on the left sidebar.
-7. Under **Environment Variables**, add the following three variables (click "Encrypt" for each):
-   - `CLIENT_ID`: *(Your Google Client ID)*
-   - `CLIENT_SECRET`: *(Your Google Client Secret)*
-   - `REFRESH_TOKEN`: *(Your Google Refresh Token)*
-8. Click **Save** and then go back to **Edit Code** and click **Deploy** one last time.
+<details>
+<summary><strong>⚙️ Advanced: Manual Deployment Instructions (Click to Expand)</strong></summary>
 
-## Installation in Nuvio
+If you prefer not to use the wizard, follow these steps:
 
-1. Copy your Worker URL. It will look like this: `https://nuvio-gdrive.YOUR_NAME.workers.dev`
-2. Open Nuvio.
-3. Paste the following URL into the addon search/install bar:
-       https://nuvio-gdrive.YOUR_NAME.workers.dev/manifest.json
-   *(Replace `YOUR_NAME` with your actual Cloudflare subdomain)*
-4. Click **Install**. You will now see a "Nuvio GDrive Search" catalog in your addons!
+1. Get your **Client ID**, **Client Secret**, and **Refresh Token** (ensure you added your email as a Test User in the OAuth Consent Screen!).
+2. Go to [Cloudflare Workers](https://dash.cloudflare.com/?to=/:account/workers) and create a new Worker named `nuvio-gdrive`.
+3. Click **Edit Code**, delete the default code, and paste the contents of [`index.js`](index.js) from this repository.
+4. Go to **Settings > Variables**, and add these three Environment Variables (click "Encrypt" for each):
+   - `CLIENT_ID`
+   - `CLIENT_SECRET`
+   - `REFRESH_TOKEN`
+5. Click **Save**, then **Deploy**.
+6. Install in Nuvio using: `https://nuvio-gdrive.YOUR_SUBDOMAIN.workers.dev/manifest.json`
+</details>
 
-## Configuration (Optional)
-If you want to change how the addon behaves (e.g., change the addon name, filter specific resolutions, or restrict searches to specific folder IDs), open the `index.js` file and modify the `CONFIG` object at the very top of the code, then redeploy your Worker.
-
+## License
+MIT License. Feel free to fork, modify, and share.
