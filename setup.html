@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuvio GDrive Addon - Easy Setup Wizard</title>
+    <!-- Syntax Highlighting for the code block -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    
     <style>
         :root {
             --bg: #0f0f13;
@@ -16,210 +21,48 @@
             --success: #00b894;
             --error: #ef4444;
             --cloudflare: #f38020;
+            --accent: #00cec9;
         }
+
+        * { box-sizing: border-box; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 20px;
+            padding: 30px 20px;
             line-height: 1.6;
+            min-height: 100vh;
         }
+
         .container {
             max-width: 900px;
             margin: 0 auto;
         }
+
         h1 {
             text-align: center;
             color: var(--primary);
             margin-bottom: 10px;
+            font-size: 2.2rem;
         }
+
         .subtitle {
             text-align: center;
             color: var(--text-muted);
             margin-bottom: 40px;
+            font-size: 1.05rem;
         }
-        .step {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-            display: none;
-        }
-        .step.active {
-            display: block;
-            animation: fadeIn 0.3s ease-in;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .step-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .step-number {
-            background: var(--primary);
-            color: white;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-        .step-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-        }
-        .instruction {
-            color: var(--text-muted);
-            margin-bottom: 15px;
-        }
-        .instruction a {
-            color: var(--primary-hover);
-            text-decoration: none;
-        }
-        .instruction a:hover {
-            text-decoration: underline;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text);
-        }
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 10px;
-            margin-right: 10px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-        .btn:hover {
-            background: var(--primary-hover);
-        }
-        .btn-secondary {
-            background: var(--border);
-        }
-        .btn-secondary:hover {
-            background: #3a3a4a;
-        }
-        .btn-cloudflare {
-            background: var(--cloudflare);
-            color: #000;
-        }
-        .btn-cloudflare:hover {
-            background: #ff9933;
-        }
-        .btn-success {
-            background: var(--success);
-            color: #000;
-        }
-        .btn-success:hover {
-            background: #55efc4;
-        }
-        .code-block {
-            background: #000;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.85rem;
-            color: #00ff00;
-            max-height: 300px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-break: break-all;
-            margin-top: 15px;
-        }
-        .warning {
-            background: rgba(255, 193, 7, 0.1);
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            border-radius: 4px;
-            margin: 15px 0;
-            color: #ffc107;
-        }
-        .status {
-            margin-top: 14px;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            display: none;
-            word-break: break-all;
-        }
-        .status.success { display: block; background: rgba(0, 184, 148, 0.15); border: 1px solid var(--success); color: #55efc4; }
-        .status.error { display: block; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--error); color: #fca5a5; }
-        .folder-list {
-            margin-top: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 8px;
-            background: #0b1120;
-            display: none;
-        }
-        .folder-item {
-            font-size: 13px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            user-select: none;
-        }
-        .folder-item input[type="checkbox"] {
-            accent-color: var(--primary);
-            cursor: pointer;
-            width: 16px;
-            height: 16px;
-        }
-        .success-msg {
-            color: var(--success);
-            font-weight: bold;
-            display: none;
-            margin-left: 10px;
-        }
+
+        /* Progress Bar */
         .progress-bar {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
             position: relative;
         }
+
         .progress-bar::before {
             content: '';
             position: absolute;
@@ -230,6 +73,7 @@
             background: var(--border);
             z-index: 0;
         }
+
         .progress-step {
             position: relative;
             z-index: 1;
@@ -237,54 +81,329 @@
             padding: 0 10px;
             color: var(--text-muted);
             font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: color 0.3s;
         }
+
+        .progress-step .dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+        }
+
         .progress-step.active {
             color: var(--primary);
             font-weight: bold;
         }
-        .quick-links {
+
+        .progress-step.active .dot {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 12px rgba(123, 44, 191, 0.4);
+        }
+
+        /* Steps */
+        .step {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-header {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 15px;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
         }
-        .info-box {
-            background: rgba(123, 44, 191, 0.1);
-            border: 1px solid var(--primary);
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .instruction {
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .instruction a {
+            color: var(--primary-hover);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .instruction a:hover {
+            text-decoration: underline;
+        }
+
+        /* Forms */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 15px;
-            margin: 15px 0;
+            color: var(--text);
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(123, 44, 191, 0.2);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #3a3a4a;
+        }
+
+        .btn-cloudflare {
+            background: var(--cloudflare);
+            color: #fff;
+        }
+
+        .btn-cloudflare:hover {
+            background: #ff9933;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #000;
+        }
+
+        .btn-success:hover {
+            background: #55efc4;
+        }
+
+        /* Code Block */
+        .code-wrapper {
+            position: relative;
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        pre {
+            margin: 0 !important;
+            padding: 20px !important;
+            background: #0d1117 !important;
+            max-height: 450px;
+            overflow-y: auto;
+            font-size: 0.85rem !important;
+            line-height: 1.5 !important;
+        }
+
+        /* Utilities */
         .copy-inline {
-            background: #000;
+            background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 6px;
-            padding: 8px 10px;
+            padding: 10px 12px;
             font-family: 'Courier New', Courier, monospace;
-            color: #00ff00;
+            color: var(--accent);
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            margin: 6px 0 14px 0;
+            margin: 8px 0 15px 0;
+            font-size: 0.9rem;
+            word-break: break-all;
         }
-        .copy-inline span {
-            overflow-x: auto;
-            white-space: nowrap;
-        }
+
         .copy-mini-btn {
             background: var(--border);
             color: var(--text);
             border: none;
-            padding: 6px 10px;
+            padding: 6px 12px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.8rem;
             flex-shrink: 0;
+            transition: background 0.2s;
         }
+
         .copy-mini-btn:hover {
             background: #3a3a4a;
         }
+
+        .warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            color: #ffc107;
+            font-size: 0.9rem;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+            word-break: break-word;
+        }
+
+        .status.success { 
+            display: block; 
+            background: rgba(0, 184, 148, 0.15); 
+            border: 1px solid var(--success); 
+            color: #55efc4; 
+        }
+
+        .status.error { 
+            display: block; 
+            background: rgba(239, 68, 68, 0.15); 
+            border: 1px solid var(--error); 
+            color: #fca5a5; 
+        }
+
+        .folder-list {
+            margin-top: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            background: var(--bg);
+            display: none;
+        }
+
+        .folder-item {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+            padding: 6px;
+            border-radius: 6px;
+        }
+
+        .folder-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .folder-item input[type="checkbox"] {
+            accent-color: var(--primary);
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            margin: 0;
+        }
+
+        .success-msg {
+            color: var(--success);
+            font-weight: bold;
+            display: none;
+            margin-left: 10px;
+            font-size: 0.9rem;
+        }
+
+        .info-box {
+            background: rgba(123, 44, 191, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -293,10 +412,10 @@
         <p class="subtitle">Quick setup with automatic folder detection and one-click Stremio installation.</p>
 
         <div class="progress-bar">
-            <div class="progress-step active" id="prog1">1. Credentials</div>
-            <div class="progress-step" id="prog2">2. Generate Code</div>
-            <div class="progress-step" id="prog3">3. Branding & Publish</div>
-            <div class="progress-step" id="prog4">4. Deploy & Install</div>
+            <div class="progress-step active" id="prog1"><div class="dot">1</div>Credentials</div>
+            <div class="progress-step" id="prog2"><div class="dot">2</div>Generate Code</div>
+            <div class="progress-step" id="prog3"><div class="dot">3</div>Branding & Publish</div>
+            <div class="progress-step" id="prog4"><div class="dot">4</div>Deploy & Install</div>
         </div>
 
         <!-- STEP 1 -->
@@ -314,9 +433,9 @@
                 3. Go to <strong>APIs & Services > Library</strong>, search for <strong>Google Drive API</strong>, and <strong>Enable</strong> it.<br>
                 4. Go to <strong>APIs & Services > Credentials</strong>. Click <strong>Create Credentials > OAuth client ID</strong>.<br>
                 5. Application type: <strong>Web application</strong>. Name: <code>Nuvio GDrive</code>.<br>
-                6. Under <strong>Authorized redirect URIs</strong>, paste this page's URL:<br>
+                6. Under <strong>Authorized redirect URIs</strong>, paste this exact URL:<br>
                 <div class="copy-inline">
-                    <span id="currentRedirectUri"></span>
+                    <span id="currentRedirectUri">https://wmaeve07.github.io/nuvio-gdrive-addon/setup.html</span>
                     <button class="copy-mini-btn" onclick="copyText(document.getElementById('currentRedirectUri').innerText, this)">Copy</button>
                 </div>
                 7. Click <strong>Create</strong>. Copy your <strong>Client ID</strong> and <strong>Client Secret</strong>.
@@ -327,7 +446,7 @@
                 1. Open the <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank">OAuth Consent Screen</a>.<br>
                 2. Enter <strong>App name</strong> = "Nuvio GDrive" and fill the email fields.<br>
                 3. On the <strong>Test users</strong> screen, click <strong>+ ADD USERS</strong> and enter your Gmail address.<br>
-                <span style="color: #ffc107;">⚠️ Skipping this causes an immediate "Access Blocked" authorization error.</span>
+                <span class="warning">⚠️ Skipping this causes an immediate "Access Blocked" authorization error.</span>
             </div>
 
             <div class="instruction">
@@ -343,29 +462,30 @@
                 <input type="password" id="clientSecret" placeholder="GOCSPX-xxx" oninput="saveCredentials(); generateCode();">
             </div>
 
-            <div class="quick-links">
-                <button type="button" class="btn btn-secondary" onclick="startOAuthFlow()">🔑 Authorize with Google</button>
+            <div class="btn-group">
+                <button type="button" class="btn" style="background:#0984e3;" onclick="startOAuthFlow()">🔑 Authorize with Google</button>
             </div>
 
-            <div class="input-group" style="margin-top: 15px;">
+            <div class="input-group" style="margin-top: 20px;">
                 <label>Refresh Token (Auto-populated on return)</label>
                 <input type="password" id="refreshToken" placeholder="1//0gABC...longstring..." oninput="generateCode()">
             </div>
 
-            <div class="quick-links">
-                <button type="button" class="btn" style="background:#0984e3;" onclick="testConnection()">🧪 Test Connection & Detect Folders</button>
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="testConnection()">🧪 Test Connection & Detect Folders</button>
             </div>
 
             <div id="statusBox" class="status"></div>
             
             <!-- SELECTABLE FOLDER LIST -->
-            <div id="folderWrapper" style="display:none; margin-top:15px;">
+            <div id="folderWrapper" class="hidden" style="margin-top:15px;">
                 <label>Select Folders to Scan (Leave all unchecked to search your whole Drive):</label>
                 <div id="folderList" class="folder-list"></div>
             </div>
 
-            <br>
-            <button class="btn" onclick="goToStep(2)">Next: Generate Custom Code →</button>
+            <div class="btn-group" style="justify-content: flex-end; margin-top: 25px;">
+                <button class="btn" onclick="goToStep(2)">Next: Generate Custom Code →</button>
+            </div>
         </div>
 
         <!-- STEP 2 -->
@@ -377,27 +497,33 @@
             <p class="instruction">Credentials and selected folders have been injected automatically into the worker script:</p>
 
             <label style="margin-top:15px;">Your Addon Code:</label>
-            <div class="code-block" id="codeOutput">Fill in your credentials in Step 1 to generate code...</div>
+            <div class="code-wrapper">
+                <pre><code class="language-javascript" id="codeOutput">// Fill in your credentials in Step 1 to generate code...</code></pre>
+            </div>
             
-            <button class="btn" id="copyBtn" onclick="copyCode()">📋 Copy Code</button>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+                <button class="btn" id="copyBtn" onclick="copyCode()">📋 Copy Code</button>
+            </div>
             <span class="success-msg" id="copyMsg">Copied to clipboard!</span>
-            <br><br>
-            <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
-            <button class="btn" onclick="goToStep(3)">I copied the code! Next →</button>
+            
+            <div class="btn-group" style="justify-content: flex-end; margin-top: 10px;">
+                <button class="btn" onclick="goToStep(3)">I copied the code! Next →</button>
+            </div>
         </div>
 
-        <!-- STEP 3: BRANDING & PUBLISH (RESTORED WITH ALL 4 FIELDS) -->
+        <!-- STEP 3 -->
         <div class="step" id="step3">
             <div class="step-header">
                 <div class="step-number">3</div>
                 <div class="step-title">Keep Token Active (Publish App)</div>
             </div>
-            <p class="instruction">Publish your app to prevent Google from expiring your refresh token every 7 days[cite: 3]:</p>
+            <p class="instruction">Publish your app to prevent Google from expiring your refresh token every 7 days:</p>
 
             <div class="instruction">
                 <strong>A. Fill in App Domain fields:</strong><br>
-                1. Go to the <a href="https://console.cloud.google.com/auth/branding" target="_blank">OAuth Branding Page</a> (APIs & Services → OAuth consent screen → Branding)[cite: 3].<br>
-                2. Paste the URLs below into each required field[cite: 3]:
+                1. Go to the <a href="https://console.cloud.google.com/auth/branding" target="_blank">OAuth Branding Page</a> (APIs & Services → OAuth consent screen → Branding).<br>
+                2. Paste the URLs below into each required field:
             </div>
 
             <label>Application home page</label>
@@ -412,18 +538,20 @@
             <label>Authorised domain</label>
             <div class="copy-inline"><span>nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('nuvio.tv', this)">Copy</button></div>
 
-            <div class="instruction">
-                3. Click <strong>Save</strong> at the bottom of the page[cite: 3].<br><br>
+            <div class="instruction" style="margin-top: 20px;">
+                3. Click <strong>Save</strong> at the bottom of the page.<br><br>
                 <strong>B. Publish the app:</strong><br>
-                1. Click the <a href="https://console.cloud.google.com/auth/audience" target="_blank">Audience tab</a> in the left sidebar[cite: 3].<br>
-                2. Click <strong>Publish App</strong> and confirm when prompted[cite: 3].
+                1. Click the <a href="https://console.cloud.google.com/auth/audience" target="_blank">Audience tab</a> in the left sidebar.<br>
+                2. Click <strong>Publish App</strong> and confirm when prompted.
             </div>
 
-            <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
-            <button class="btn" onclick="goToStep(4)">Done — Deploy & Install →</button>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
+                <button class="btn" onclick="goToStep(4)">Done — Deploy & Install →</button>
+            </div>
         </div>
 
-        <!-- STEP 4: DEPLOY & INSTALL -->
+        <!-- STEP 4 -->
         <div class="step" id="step4">
             <div class="step-header">
                 <div class="step-number">4</div>
@@ -432,19 +560,19 @@
             
             <div class="info-box">
                 <strong>Deploy to Cloudflare Workers:</strong><br>
-                Open Cloudflare to create and save your worker[cite: 3].
-                <div class="quick-links">
+                Open Cloudflare to create and save your worker.
+                <div class="btn-group" style="margin-top: 15px;">
                     <a href="https://dash.cloudflare.com/?to=/:account/workers-and-pages/create" target="_blank" class="btn btn-cloudflare">
                         🚀 Open Cloudflare Workers Dashboard
                     </a>
                 </div>
             </div>
 
-            <div class="instruction" style="margin-top: 15px;">
-                1. Click <strong>Create Worker</strong>[cite: 3].<br>
-                2. Click <strong>Deploy</strong>, then select <strong>Edit Code</strong>[cite: 3].<br>
-                3. Clear the editor, paste your copied code from Step 2, and click <strong>Save and Deploy</strong>[cite: 3].<br>
-                4. Copy the URL assigned to your worker (e.g., <code>https://my-addon.yourname.workers.dev</code>)[cite: 3].
+            <div class="instruction" style="margin-top: 20px;">
+                1. Click <strong>Create Worker</strong>.<br>
+                2. Click <strong>Deploy</strong>, then select <strong>Edit Code</strong>.<br>
+                3. Clear the editor, paste your copied code from Step 2, and click <strong>Save and Deploy</strong>.<br>
+                4. Copy the URL assigned to your worker (e.g., <code>https://my-addon.yourname.workers.dev</code>).
             </div>
 
             <div class="info-box" style="border-color: var(--success); background: rgba(0, 184, 148, 0.1);">
@@ -453,9 +581,9 @@
                     Paste your deployed Worker URL below to generate an automatic 1-click install button:
                 </p>
                 
-                <input type="text" id="deployedWorkerUrl" placeholder="https://my-addon.yourname.workers.dev" oninput="updateInstallerLinks()">
+                <input type="text" id="deployedWorkerUrl" placeholder="https://my-addon.yourname.workers.dev" oninput="updateInstallerLinks()" style="margin-bottom: 10px;">
                 
-                <div id="installButtonContainer" style="display:none; margin-top: 15px;">
+                <div id="installButtonContainer" class="hidden btn-group">
                     <a href="#" id="stremioDeepLink" class="btn btn-success">
                         📲 Install Directly to Stremio / Nuvio
                     </a>
@@ -465,12 +593,15 @@
                 </div>
             </div>
 
-            <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const redirectUri = window.location.origin + window.location.pathname;
+        // Explicitly set to the requested GitHub Pages URL
+        const redirectUri = "https://wmaeve07.github.io/nuvio-gdrive-addon/setup.html";
         document.getElementById("currentRedirectUri").innerText = redirectUri;
 
         let selectedFolderIds = [];
@@ -1094,6 +1225,7 @@ export default {
             document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
             document.getElementById('step' + stepNum).classList.add('active');
             document.querySelectorAll('.progress-step').forEach((p, i) => { p.classList.toggle('active', i < stepNum); });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function saveCredentials() {
@@ -1210,10 +1342,10 @@ export default {
                     `;
                     folderList.appendChild(item);
                 });
-                document.getElementById("folderWrapper").style.display = "block";
+                document.getElementById("folderWrapper").classList.remove("hidden");
                 document.getElementById("folderList").style.display = "block";
             } catch (err) {
-                document.getElementById("folderWrapper").style.display = "none";
+                document.getElementById("folderWrapper").classList.add("hidden");
                 showStatus("Connection Failed: " + err.message, "error");
             }
         }
@@ -1246,7 +1378,13 @@ export default {
             const folderArrStr = JSON.stringify(selectedFolderIds);
             code = code.replace('DRIVE_FOLDERS_PLACEHOLDER', folderArrStr);
 
-            document.getElementById('codeOutput').textContent = code;
+            const codeBlock = document.getElementById('codeOutput');
+            codeBlock.textContent = code;
+            
+            // Trigger Prism syntax highlighting
+            if (window.Prism) {
+                Prism.highlightElement(codeBlock);
+            }
         }
 
         function copyCode() {
@@ -1269,7 +1407,7 @@ export default {
             let val = document.getElementById("deployedWorkerUrl").value.trim();
             const container = document.getElementById("installButtonContainer");
             if (!val) {
-                container.style.display = "none";
+                container.classList.add("hidden");
                 return;
             }
 
@@ -1278,9 +1416,7 @@ export default {
             const stremioUrl = manifestUrl.replace(/^https?:\/\//i, "stremio://");
 
             document.getElementById("stremioDeepLink").href = stremioUrl;
-            container.style.display = "flex";
-            container.style.gap = "10px";
-            container.style.flexWrap = "wrap";
+            container.classList.remove("hidden");
         }
 
         function copyManifestLink() {
