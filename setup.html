@@ -123,6 +123,10 @@
             transition: background 0.2s;
             margin-top: 10px;
             margin-right: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
         }
         .btn:hover {
             background: var(--primary-hover);
@@ -139,6 +143,13 @@
         }
         .btn-cloudflare:hover {
             background: #ff9933;
+        }
+        .btn-success {
+            background: var(--success);
+            color: #000;
+        }
+        .btn-success:hover {
+            background: #55efc4;
         }
         .code-block {
             background: #000;
@@ -174,15 +185,29 @@
         .status.error { display: block; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--error); color: #fca5a5; }
         .folder-list {
             margin-top: 10px;
-            max-height: 150px;
+            max-height: 200px;
             overflow-y: auto;
             border: 1px solid var(--border);
-            padding: 10px;
-            border-radius: 6px;
+            padding: 12px;
+            border-radius: 8px;
             background: #0b1120;
             display: none;
         }
-        .folder-item { font-size: 13px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .folder-item {
+            font-size: 13px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .folder-item input[type="checkbox"] {
+            accent-color: var(--primary);
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
         .success-msg {
             color: var(--success);
             font-weight: bold;
@@ -265,13 +290,13 @@
 <body>
     <div class="container">
         <h1>🚀 Nuvio GDrive Setup Wizard</h1>
-        <p class="subtitle">Get your v5.1 addon running in a few easy steps. No technical knowledge required.</p>
+        <p class="subtitle">Quick setup with automatic folder detection and one-click Stremio installation.</p>
 
         <div class="progress-bar">
             <div class="progress-step active" id="prog1">1. Credentials</div>
             <div class="progress-step" id="prog2">2. Generate Code</div>
             <div class="progress-step" id="prog3">3. Branding & Publish</div>
-            <div class="progress-step" id="prog4">4. Deploy</div>
+            <div class="progress-step" id="prog4">4. Deploy & Install</div>
         </div>
 
         <!-- STEP 1 -->
@@ -280,7 +305,7 @@
                 <div class="step-number">1</div>
                 <div class="step-title">Get Your Google Credentials</div>
             </div>
-            <p class="instruction">We need to authorize the addon to read your Google Drive. Follow these exact steps:</p>
+            <p class="instruction">Authorize the addon to read your Google Drive files:</p>
             
             <div class="instruction">
                 <strong>A. Create OAuth Client:</strong><br>
@@ -289,7 +314,7 @@
                 3. Go to <strong>APIs & Services > Library</strong>, search for <strong>Google Drive API</strong>, and <strong>Enable</strong> it.<br>
                 4. Go to <strong>APIs & Services > Credentials</strong>. Click <strong>Create Credentials > OAuth client ID</strong>.<br>
                 5. Application type: <strong>Web application</strong>. Name: <code>Nuvio GDrive</code>.<br>
-                6. Under <strong>Authorized redirect URIs</strong>, paste this setup page's URL:<br>
+                6. Under <strong>Authorized redirect URIs</strong>, paste this page's URL:<br>
                 <div class="copy-inline">
                     <span id="currentRedirectUri"></span>
                     <button class="copy-mini-btn" onclick="copyText(document.getElementById('currentRedirectUri').innerText, this)">Copy</button>
@@ -298,28 +323,24 @@
             </div>
 
             <div class="instruction">
-                <strong>B. Add Yourself as a Test User (CRITICAL STEP):</strong><br>
-                1. Go to <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank">OAuth Consent Screen</a>.<br>
-                2. Fill in: <strong>App name</strong> = "Nuvio GDrive", <strong>User support email</strong> = your email, <strong>Developer email</strong> = your email.<br>
-                3. Click <strong>Save and Continue</strong>.<br>
-                4. On the <strong>Test users</strong> page, click <strong>+ ADD USERS</strong>.<br>
-                5. <strong>Add your Gmail address</strong> (the one you'll use for Google Drive).<br>
-                6. Click <strong>Save and Continue</strong>, then <strong>Back to Dashboard</strong>.<br>
-                <span style="color: #ffc107;">⚠️ If you skip this, you will get an "Access Blocked" error!</span>
+                <strong>B. Add Test User:</strong><br>
+                1. Open the <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank">OAuth Consent Screen</a>.<br>
+                2. Enter <strong>App name</strong> = "Nuvio GDrive" and fill the email fields.<br>
+                3. On the <strong>Test users</strong> screen, click <strong>+ ADD USERS</strong> and enter your Gmail address.<br>
+                <span style="color: #ffc107;">⚠️ Skipping this causes an immediate "Access Blocked" authorization error.</span>
             </div>
 
             <div class="instruction">
-                <strong>C. Get Your Refresh Token & Verify:</strong><br>
-                Enter your Client ID and Client Secret below, then click Authorize:
+                <strong>C. Authorize and Select Folders:</strong>
             </div>
 
             <div class="input-group">
                 <label>Client ID</label>
-                <input type="text" id="clientId" placeholder="e.g., 123456789-abc...apps.googleusercontent.com" oninput="saveCredentials(); generateCode();">
+                <input type="text" id="clientId" placeholder="123456789-xxx.apps.googleusercontent.com" oninput="saveCredentials(); generateCode();">
             </div>
             <div class="input-group">
                 <label>Client Secret</label>
-                <input type="password" id="clientSecret" placeholder="e.g., GOCSPX-abc123..." oninput="saveCredentials(); generateCode();">
+                <input type="password" id="clientSecret" placeholder="GOCSPX-xxx" oninput="saveCredentials(); generateCode();">
             </div>
 
             <div class="quick-links">
@@ -327,16 +348,21 @@
             </div>
 
             <div class="input-group" style="margin-top: 15px;">
-                <label>Refresh Token (Auto-filled on return or paste manually)</label>
+                <label>Refresh Token (Auto-populated on return)</label>
                 <input type="password" id="refreshToken" placeholder="1//0gABC...longstring..." oninput="generateCode()">
             </div>
 
             <div class="quick-links">
-                <button type="button" class="btn" style="background:#0984e3;" onclick="testConnection()">🧪 Test Connection & List Folders</button>
+                <button type="button" class="btn" style="background:#0984e3;" onclick="testConnection()">🧪 Test Connection & Detect Folders</button>
             </div>
 
             <div id="statusBox" class="status"></div>
-            <div id="folderList" class="folder-list"></div>
+            
+            <!-- FEATURE 3: SELECTABLE FOLDER LIST -->
+            <div id="folderWrapper" style="display:none; margin-top:15px;">
+                <label>Select Folders to Scan (Leave all unchecked to search your whole Drive):</label>
+                <div id="folderList" class="folder-list"></div>
+            </div>
 
             <br>
             <button class="btn" onclick="goToStep(2)">Next: Generate Custom Code →</button>
@@ -348,14 +374,10 @@
                 <div class="step-number">2</div>
                 <div class="step-title">Generate Your Custom Code (v5.1 Engine)</div>
             </div>
-            <p class="instruction">Your credentials are automatically injected into the updated high-speed v5.1 script.</p>
+            <p class="instruction">Credentials and selected folders have been injected automatically into the worker script:</p>
 
-            <div class="warning">
-                ⚠️ <strong>Security Note:</strong> This method embeds your tokens directly into the worker code for simplicity. Since this runs on your private Cloudflare account, it is secure. Do not publish this script publicly.
-            </div>
-
-            <label style="margin-top:20px;">Your Addon Code (Ready to Deploy):</label>
-            <div class="code-block" id="codeOutput">Fill in the credentials in Step 1 to generate code...</div>
+            <label style="margin-top:15px;">Your Addon Code:</label>
+            <div class="code-block" id="codeOutput">Fill in your credentials in Step 1 to generate code...</div>
             
             <button class="btn" id="copyBtn" onclick="copyCode()">📋 Copy Code</button>
             <span class="success-msg" id="copyMsg">Copied to clipboard!</span>
@@ -368,76 +390,73 @@
         <div class="step" id="step3">
             <div class="step-header">
                 <div class="step-number">3</div>
-                <div class="step-title">Verify Branding & Publish Your App</div>
+                <div class="step-title">Keep Token Active (Publish App)</div>
             </div>
-            <p class="instruction">Apps left in "Testing" mode expire tokens every 7 days. Completing this keeps your token active permanently.</p>
+            <p class="instruction">Publish your app to prevent Google from expiring your refresh token every 7 days[cite: 2]:</p>
 
             <div class="instruction">
-                <strong>A. Fill in App Domain fields:</strong><br>
-                1. Go to <a href="https://console.cloud.google.com/auth/branding" target="_blank">OAuth Branding page</a>.<br>
-                2. Enter the following in each field:
+                1. Go to the <a href="https://console.cloud.google.com/auth/branding" target="_blank">OAuth Branding Page</a> and set these URLs[cite: 2]:
             </div>
 
             <label>Application home page</label>
             <div class="copy-inline"><span>https://nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('https://nuvio.tv', this)">Copy</button></div>
 
-            <label>Application privacy policy link</label>
-            <div class="copy-inline"><span>https://nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('https://nuvio.tv', this)">Copy</button></div>
-
-            <label>Application Terms of Service link</label>
-            <div class="copy-inline"><span>https://nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('https://nuvio.tv', this)">Copy</button></div>
-
-            <label>Authorised domain</label>
+            <label>Authorized domain</label>
             <div class="copy-inline"><span>nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('nuvio.tv', this)">Copy</button></div>
 
             <div class="instruction">
-                3. Click <strong>Save</strong> at the bottom of the Branding page.
-            </div>
-
-            <div class="instruction">
-                <strong>B. Publish the app:</strong><br>
-                1. Go to the <a href="https://console.cloud.google.com/auth/audience" target="_blank">Audience</a> tab in the left sidebar.<br>
-                2. Click <strong>Publish App</strong> and confirm when prompted.
+                2. Click <strong>Save</strong>, open the <a href="https://console.cloud.google.com/auth/audience" target="_blank">Audience tab</a>, and click <strong>Publish App</strong>[cite: 2].
             </div>
 
             <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
-            <button class="btn" onclick="goToStep(4)">Done — Deploy Now →</button>
+            <button class="btn" onclick="goToStep(4)">Done — Deploy & Install →</button>
         </div>
 
-        <!-- STEP 4: DEPLOY -->
+        <!-- STEP 4: DEPLOY & INSTALL (FEATURES 1 & 2) -->
         <div class="step" id="step4">
             <div class="step-header">
                 <div class="step-number">4</div>
-                <div class="step-title">Deploy to Cloudflare Workers</div>
+                <div class="step-title">Deploy & 1-Click Install</div>
             </div>
             
+            <!-- FEATURE 1: DIRECT CLOUDFLARE DEPLOY NAVIGATION -->
             <div class="info-box">
-                <strong>🚀 Quick Deploy:</strong> Create a worker, drop your code in, and deploy.
-            </div>
-            
-            <div class="quick-links">
-                <a href="https://dash.cloudflare.com/?to=/:account/workers-and-pages/create" target="_blank" class="btn btn-cloudflare">
-                    🚀 Open Cloudflare Workers
-                </a>
-                <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
+                <strong>Deploy to Cloudflare Workers:</strong><br>
+                Open Cloudflare to create and save your worker[cite: 2].
+                <div class="quick-links">
+                    <a href="https://dash.cloudflare.com/?to=/:account/workers-and-pages/create" target="_blank" class="btn btn-cloudflare">
+                        🚀 Open Cloudflare Workers Dashboard
+                    </a>
+                </div>
             </div>
 
-            <div class="instruction" style="margin-top: 25px;">
-                <strong>Deployment Steps:</strong><br>
-                1. Name your worker (e.g., <code>gdrive-addon</code>).<br>
-                2. Click <strong>"Deploy"</strong>.<br>
-                3. Click <strong>"Edit Code"</strong>.<br>
-                4. Delete all existing code in the editor.<br>
-                5. <strong>Paste the code</strong> you copied from Step 2.<br>
-                6. Click <strong>"Save and Deploy"</strong>.<br>
-                7. Copy your Worker URL.
+            <div class="instruction" style="margin-top: 15px;">
+                1. Click <strong>Create Worker</strong>[cite: 2].<br>
+                2. Click <strong>Deploy</strong>, then select <strong>Edit Code</strong>[cite: 2].<br>
+                3. Clear the editor, paste your copied code from Step 2, and click <strong>Save and Deploy</strong>[cite: 2].<br>
+                4. Copy the URL assigned to your worker (e.g., <code>https://my-addon.yourname.workers.dev</code>)[cite: 2].
             </div>
 
-            <div class="info-box">
-                <strong>📺 Install in Nuvio / Stremio:</strong><br>
-                Your manifest URL will look like:<br>
-                <code style="color:#00ff00; display: block; margin-top: 10px;">https://YOUR-WORKER-NAME.workers.dev/manifest.json</code>
+            <!-- FEATURE 2: 1-CLICK STREMIO INSTALLER -->
+            <div class="info-box" style="border-color: var(--success); background: rgba(0, 184, 148, 0.1);">
+                <strong>⚡ Instant Stremio / Nuvio Installer:</strong>
+                <p style="margin: 6px 0 12px 0; font-size: 0.9rem; color: var(--text-muted);">
+                    Paste your deployed Worker URL below to generate an automatic 1-click install button:
+                </p>
+                
+                <input type="text" id="deployedWorkerUrl" placeholder="https://my-addon.yourname.workers.dev" oninput="updateInstallerLinks()">
+                
+                <div id="installButtonContainer" style="display:none; margin-top: 15px;">
+                    <a href="#" id="stremioDeepLink" class="btn btn-success">
+                        📲 Install Directly to Stremio / Nuvio
+                    </a>
+                    <button class="btn btn-secondary" onclick="copyManifestLink()">
+                        📋 Copy Manifest Link
+                    </button>
+                </div>
             </div>
+
+            <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
         </div>
     </div>
 
@@ -445,7 +464,8 @@
         const redirectUri = window.location.origin + window.location.pathname;
         document.getElementById("currentRedirectUri").innerText = redirectUri;
 
-        // UPDATED v5.1 WORKER ENGINE
+        let selectedFolderIds = [];
+
         const baseCode = `const CONFIG = {
   addonName: "Gdrive 5.1",
   resolutions: ["2160p", "1080p", "720p", "480p", "Unknown"],
@@ -461,7 +481,7 @@
   proxiedPlayback: true,
   strictTitleCheck: false,
   maxFilesToFetch: 200,
-  driveFolderIds: [],
+  driveFolderIds: DRIVE_FOLDERS_PLACEHOLDER,
   tmdbApiKey: "aa268f21c12be3374a08b7deafad3f6d",
   clientId: "CLIENT_ID_PLACEHOLDER",
   clientSecret: "CLIENT_SECRET_PLACEHOLDER",
@@ -1061,7 +1081,6 @@ export default {
   }
 };`;
 
-        // PROGRESSION CONTROLLER
         function goToStep(stepNum) {
             document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
             document.getElementById('step' + stepNum).classList.add('active');
@@ -1073,7 +1092,6 @@ export default {
             sessionStorage.setItem("saved_client_secret", document.getElementById("clientSecret").value.trim());
         }
 
-        // STEP 1: ONE-CLICK OAUTH FLOW
         function startOAuthFlow() {
             const clientId = document.getElementById("clientId").value.trim();
             if (!clientId) {
@@ -1086,7 +1104,6 @@ export default {
             window.location.href = authUrl;
         }
 
-        // AUTO-CATCH GOOGLE CODE REDIRECT
         async function handleRedirectCode() {
             const params = new URLSearchParams(window.location.search);
             const code = params.get("code");
@@ -1099,7 +1116,7 @@ export default {
             if (clientSecret) document.getElementById("clientSecret").value = clientSecret;
 
             if (!clientId || !clientSecret) {
-                showStatus("Authorization code received. Please re-enter your Client Secret to fetch token.", "error");
+                showStatus("Authorization code received. Enter your Client Secret to complete token retrieval.", "error");
                 return;
             }
 
@@ -1126,7 +1143,7 @@ export default {
                     showStatus("Successfully retrieved Refresh Token!", "success");
                     generateCode();
                 } else {
-                    showStatus("No refresh token returned. Revoke addon access in Google account settings and re-authorize.", "error");
+                    showStatus("No refresh token returned. Revoke access from your Google Account security settings and re-authorize.", "error");
                 }
 
                 window.history.replaceState({}, document.title, window.location.pathname);
@@ -1135,7 +1152,7 @@ export default {
             }
         }
 
-        // STEP 2: TEST CONNECTION & LIST FOLDERS
+        // FEATURE 3: TEST CONNECTION + FOLDER CHECKBOX LIST
         async function testConnection() {
             const clientId = document.getElementById("clientId").value.trim();
             const clientSecret = document.getElementById("clientSecret").value.trim();
@@ -1155,7 +1172,7 @@ export default {
                     body: new URLSearchParams({
                         client_id: clientId,
                         client_secret: clientSecret,
-                        refresh_token: refreshToken,
+                        refreshToken: refreshToken,
                         grant_type: "refresh_token",
                     })
                 });
@@ -1165,28 +1182,41 @@ export default {
 
                 const accessToken = tokenData.access_token;
                 const driveRes = await fetch(
-                    "https://www.googleapis.com/drive/v3/files?q=mimeType%3D'application%2Fvnd.google-apps.folder'+and+trashed%3Dfalse&pageSize=15&fields=files(id%2Cname)",
+                    "https://www.googleapis.com/drive/v3/files?q=mimeType%3D'application%2Fvnd.google-apps.folder'+and+trashed%3Dfalse&pageSize=30&fields=files(id%2Cname)",
                     { headers: { Authorization: `Bearer ${accessToken}` } }
                 );
 
                 const driveData = await driveRes.json();
                 if (!driveRes.ok) throw new Error(driveData.error?.message || "Failed to read drive directory");
 
-                showStatus(`✅ Connection verified! Detected ${driveData.files.length} folder(s) in Drive.`, "success");
+                showStatus(`✅ Connected! Found ${driveData.files.length} folder(s). Check any you want scanned:`, "success");
 
                 const folderList = document.getElementById("folderList");
-                folderList.innerHTML = "<strong>Detected Folders:</strong><br/>";
+                folderList.innerHTML = "";
                 driveData.files.forEach(folder => {
-                    const item = document.createElement("div");
+                    const item = document.createElement("label");
                     item.className = "folder-item";
-                    item.innerHTML = `<code>${folder.id}</code> — <strong>${folder.name}</strong>`;
+                    item.innerHTML = `
+                        <input type="checkbox" value="${folder.id}" onchange="toggleFolder(this)">
+                        <span>📁 <strong>${folder.name}</strong> <code style="color:#a0a0b0; font-size:0.75rem;">(${folder.id})</code></span>
+                    `;
                     folderList.appendChild(item);
                 });
-                folderList.style.display = "block";
+                document.getElementById("folderWrapper").style.display = "block";
+                document.getElementById("folderList").style.display = "block";
             } catch (err) {
-                document.getElementById("folderList").style.display = "none";
+                document.getElementById("folderWrapper").style.display = "none";
                 showStatus("Connection Failed: " + err.message, "error");
             }
+        }
+
+        function toggleFolder(checkbox) {
+            if (checkbox.checked) {
+                if (!selectedFolderIds.includes(checkbox.value)) selectedFolderIds.push(checkbox.value);
+            } else {
+                selectedFolderIds = selectedFolderIds.filter(id => id !== checkbox.value);
+            }
+            generateCode();
         }
 
         function showStatus(message, type) {
@@ -1199,10 +1229,15 @@ export default {
             const cid = document.getElementById('clientId').value.trim();
             const csec = document.getElementById('clientSecret').value.trim();
             const rtok = document.getElementById('refreshToken').value.trim();
+            
             let code = baseCode;
             if (cid) code = code.replace('CLIENT_ID_PLACEHOLDER', cid);
             if (csec) code = code.replace('CLIENT_SECRET_PLACEHOLDER', csec);
             if (rtok) code = code.replace('REFRESH_TOKEN_PLACEHOLDER', rtok);
+
+            const folderArrStr = JSON.stringify(selectedFolderIds);
+            code = code.replace('DRIVE_FOLDERS_PLACEHOLDER', folderArrStr);
+
             document.getElementById('codeOutput').textContent = code;
         }
 
@@ -1220,6 +1255,31 @@ export default {
                 btn.textContent = 'Copied!';
                 setTimeout(() => btn.textContent = original, 1500);
             });
+        }
+
+        // FEATURE 2: 1-CLICK STREMIO INSTALLER CONTROLLER
+        function updateInstallerLinks() {
+            let val = document.getElementById("deployedWorkerUrl").value.trim();
+            const container = document.getElementById("installButtonContainer");
+            if (!val) {
+                container.style.display = "none";
+                return;
+            }
+
+            val = val.replace(/\/manifest\.json$/, "").replace(/\/$/, "");
+            const manifestUrl = `${val}/manifest.json`;
+            const stremioUrl = manifestUrl.replace(/^https?:\/\//i, "stremio://");
+
+            document.getElementById("stremioDeepLink").href = stremioUrl;
+            container.style.display = "flex";
+            container.style.gap = "10px";
+            container.style.flexWrap = "wrap";
+        }
+
+        function copyManifestLink() {
+            let val = document.getElementById("deployedWorkerUrl").value.trim().replace(/\/manifest\.json$/, "").replace(/\/$/, "");
+            const manifestUrl = `${val}/manifest.json`;
+            navigator.clipboard.writeText(manifestUrl).then(() => alert("Manifest link copied!"));
         }
 
         window.addEventListener("DOMContentLoaded", () => {
