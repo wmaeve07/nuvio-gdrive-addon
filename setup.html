@@ -358,7 +358,7 @@
 
             <div id="statusBox" class="status"></div>
             
-            <!-- FEATURE 3: SELECTABLE FOLDER LIST -->
+            <!-- SELECTABLE FOLDER LIST -->
             <div id="folderWrapper" style="display:none; margin-top:15px;">
                 <label>Select Folders to Scan (Leave all unchecked to search your whole Drive):</label>
                 <div id="folderList" class="folder-list"></div>
@@ -386,43 +386,53 @@
             <button class="btn" onclick="goToStep(3)">I copied the code! Next →</button>
         </div>
 
-        <!-- STEP 3: BRANDING & PUBLISH -->
+        <!-- STEP 3: BRANDING & PUBLISH (RESTORED WITH ALL 4 FIELDS) -->
         <div class="step" id="step3">
             <div class="step-header">
                 <div class="step-number">3</div>
                 <div class="step-title">Keep Token Active (Publish App)</div>
             </div>
-            <p class="instruction">Publish your app to prevent Google from expiring your refresh token every 7 days[cite: 2]:</p>
+            <p class="instruction">Publish your app to prevent Google from expiring your refresh token every 7 days[cite: 3]:</p>
 
             <div class="instruction">
-                1. Go to the <a href="https://console.cloud.google.com/auth/branding" target="_blank">OAuth Branding Page</a> and set these URLs[cite: 2]:
+                <strong>A. Fill in App Domain fields:</strong><br>
+                1. Go to the <a href="https://console.cloud.google.com/auth/branding" target="_blank">OAuth Branding Page</a> (APIs & Services → OAuth consent screen → Branding)[cite: 3].<br>
+                2. Paste the URLs below into each required field[cite: 3]:
             </div>
 
             <label>Application home page</label>
             <div class="copy-inline"><span>https://nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('https://nuvio.tv', this)">Copy</button></div>
 
-            <label>Authorized domain</label>
+            <label>Application privacy policy link</label>
+            <div class="copy-inline"><span>https://nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('https://nuvio.tv', this)">Copy</button></div>
+
+            <label>Application Terms of Service link</label>
+            <div class="copy-inline"><span>https://nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('https://nuvio.tv', this)">Copy</button></div>
+
+            <label>Authorised domain</label>
             <div class="copy-inline"><span>nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('nuvio.tv', this)">Copy</button></div>
 
             <div class="instruction">
-                2. Click <strong>Save</strong>, open the <a href="https://console.cloud.google.com/auth/audience" target="_blank">Audience tab</a>, and click <strong>Publish App</strong>[cite: 2].
+                3. Click <strong>Save</strong> at the bottom of the page[cite: 3].<br><br>
+                <strong>B. Publish the app:</strong><br>
+                1. Click the <a href="https://console.cloud.google.com/auth/audience" target="_blank">Audience tab</a> in the left sidebar[cite: 3].<br>
+                2. Click <strong>Publish App</strong> and confirm when prompted[cite: 3].
             </div>
 
             <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
             <button class="btn" onclick="goToStep(4)">Done — Deploy & Install →</button>
         </div>
 
-        <!-- STEP 4: DEPLOY & INSTALL (FEATURES 1 & 2) -->
+        <!-- STEP 4: DEPLOY & INSTALL -->
         <div class="step" id="step4">
             <div class="step-header">
                 <div class="step-number">4</div>
                 <div class="step-title">Deploy & 1-Click Install</div>
             </div>
             
-            <!-- FEATURE 1: DIRECT CLOUDFLARE DEPLOY NAVIGATION -->
             <div class="info-box">
                 <strong>Deploy to Cloudflare Workers:</strong><br>
-                Open Cloudflare to create and save your worker[cite: 2].
+                Open Cloudflare to create and save your worker[cite: 3].
                 <div class="quick-links">
                     <a href="https://dash.cloudflare.com/?to=/:account/workers-and-pages/create" target="_blank" class="btn btn-cloudflare">
                         🚀 Open Cloudflare Workers Dashboard
@@ -431,13 +441,12 @@
             </div>
 
             <div class="instruction" style="margin-top: 15px;">
-                1. Click <strong>Create Worker</strong>[cite: 2].<br>
-                2. Click <strong>Deploy</strong>, then select <strong>Edit Code</strong>[cite: 2].<br>
-                3. Clear the editor, paste your copied code from Step 2, and click <strong>Save and Deploy</strong>[cite: 2].<br>
-                4. Copy the URL assigned to your worker (e.g., <code>https://my-addon.yourname.workers.dev</code>)[cite: 2].
+                1. Click <strong>Create Worker</strong>[cite: 3].<br>
+                2. Click <strong>Deploy</strong>, then select <strong>Edit Code</strong>[cite: 3].<br>
+                3. Clear the editor, paste your copied code from Step 2, and click <strong>Save and Deploy</strong>[cite: 3].<br>
+                4. Copy the URL assigned to your worker (e.g., <code>https://my-addon.yourname.workers.dev</code>)[cite: 3].
             </div>
 
-            <!-- FEATURE 2: 1-CLICK STREMIO INSTALLER -->
             <div class="info-box" style="border-color: var(--success); background: rgba(0, 184, 148, 0.1);">
                 <strong>⚡ Instant Stremio / Nuvio Installer:</strong>
                 <p style="margin: 6px 0 12px 0; font-size: 0.9rem; color: var(--text-muted);">
@@ -1152,7 +1161,6 @@ export default {
             }
         }
 
-        // FEATURE 3: TEST CONNECTION + FOLDER CHECKBOX LIST
         async function testConnection() {
             const clientId = document.getElementById("clientId").value.trim();
             const clientSecret = document.getElementById("clientSecret").value.trim();
@@ -1172,7 +1180,7 @@ export default {
                     body: new URLSearchParams({
                         client_id: clientId,
                         client_secret: clientSecret,
-                        refreshToken: refreshToken,
+                        refresh_token: refreshToken,
                         grant_type: "refresh_token",
                     })
                 });
@@ -1257,7 +1265,6 @@ export default {
             });
         }
 
-        // FEATURE 2: 1-CLICK STREMIO INSTALLER CONTROLLER
         function updateInstallerLinks() {
             let val = document.getElementById("deployedWorkerUrl").value.trim();
             const container = document.getElementById("installButtonContainer");
