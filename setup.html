@@ -1,1434 +1,1398 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuvio GDrive Addon - Easy Setup Wizard</title>
-    <!-- Syntax Highlighting for the code block -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    
-    <style>
-        :root {
-            --bg: #0f0f13;
-            --card: #1a1a24;
-            --primary: #7b2cbf;
-            --primary-hover: #9d4edd;
-            --text: #ffffff;
-            --text-muted: #a0a0b0;
-            --border: #2a2a3a;
-            --success: #00b894;
-            --error: #ef4444;
-            --cloudflare: #f38020;
-            --accent: #00cec9;
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 30px 20px;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--primary);
-            margin-bottom: 10px;
-            font-size: 2.2rem;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            margin-bottom: 40px;
-            font-size: 1.05rem;
-        }
-
-        /* Progress Bar */
-        .progress-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 35px;
-            position: relative;
-        }
-
-        .progress-bar::before {
-            content: '';
-            position: absolute;
-            top: 15px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--border);
-            z-index: 0;
-        }
-
-        .progress-step {
-            position: relative;
-            z-index: 1;
-            background: var(--bg);
-            padding: 0 10px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: color 0.3s;
-        }
-
-        .progress-step .dot {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--card);
-            border: 2px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-bottom: 8px;
-            transition: all 0.3s;
-        }
-
-        .progress-step.active {
-            color: var(--primary);
-            font-weight: bold;
-        }
-
-        .progress-step.active .dot {
-            border-color: var(--primary);
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 0 12px rgba(123, 44, 191, 0.4);
-        }
-
-        /* Steps */
-        .step {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 25px;
-            display: none;
-            animation: fadeIn 0.4s ease-out;
-        }
-
-        .step.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .step-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 25px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 15px;
-        }
-
-        .step-number {
-            background: var(--primary);
-            color: white;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-
-        .step-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-
-        .instruction {
-            color: var(--text-muted);
-            margin-bottom: 15px;
-            font-size: 0.95rem;
-        }
-
-        .instruction a {
-            color: var(--primary-hover);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .instruction a:hover {
-            text-decoration: underline;
-        }
-
-        /* Forms */
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text);
-            font-size: 0.95rem;
-        }
-
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 12px 14px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 0.95rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(123, 44, 191, 0.2);
-        }
-
-        /* Buttons */
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .btn:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-secondary {
-            background: var(--border);
-            color: var(--text);
-        }
-
-        .btn-secondary:hover {
-            background: #3a3a4a;
-        }
-
-        .btn-cloudflare {
-            background: var(--cloudflare);
-            color: #fff;
-        }
-
-        .btn-cloudflare:hover {
-            background: #ff9933;
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: #000;
-        }
-
-        .btn-success:hover {
-            background: #55efc4;
-        }
-
-        /* Code Block */
-        .code-wrapper {
-            position: relative;
-            margin: 20px 0;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-        }
-
-        pre {
-            margin: 0 !important;
-            padding: 20px !important;
-            background: #0d1117 !important;
-            max-height: 450px;
-            overflow-y: auto;
-            font-size: 0.85rem !important;
-            line-height: 1.5 !important;
-        }
-
-        /* Utilities */
-        .copy-inline {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 10px 12px;
-            font-family: 'Courier New', Courier, monospace;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin: 8px 0 15px 0;
-            font-size: 0.9rem;
-            word-break: break-all;
-        }
-
-        .copy-mini-btn {
-            background: var(--border);
-            color: var(--text);
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            flex-shrink: 0;
-            transition: background 0.2s;
-        }
-
-        .copy-mini-btn:hover {
-            background: #3a3a4a;
-        }
-
-        .warning {
-            background: rgba(255, 193, 7, 0.1);
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            border-radius: 4px;
-            margin: 15px 0;
-            color: #ffc107;
-            font-size: 0.9rem;
-        }
-
-        .status {
-            margin-top: 15px;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            display: none;
-            word-break: break-word;
-        }
-
-        .status.success { 
-            display: block; 
-            background: rgba(0, 184, 148, 0.15); 
-            border: 1px solid var(--success); 
-            color: #55efc4; 
-        }
-
-        .status.error { 
-            display: block; 
-            background: rgba(239, 68, 68, 0.15); 
-            border: 1px solid var(--error); 
-            color: #fca5a5; 
-        }
-
-        .folder-list {
-            margin-top: 10px;
-            max-height: 250px;
-            overflow-y: auto;
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 8px;
-            background: var(--bg);
-            display: none;
-        }
-
-        .folder-item {
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            user-select: none;
-            padding: 6px;
-            border-radius: 6px;
-        }
-
-        .folder-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .folder-item input[type="checkbox"] {
-            accent-color: var(--primary);
-            cursor: pointer;
-            width: 16px;
-            height: 16px;
-            margin: 0;
-        }
-
-        .success-msg {
-            color: var(--success);
-            font-weight: bold;
-            display: none;
-            margin-left: 10px;
-            font-size: 0.9rem;
-        }
-
-        .info-box {
-            background: rgba(123, 44, 191, 0.1);
-            border: 1px solid var(--primary);
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
-        .hidden { display: none !important; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuvio GDrive Addon - Easy Setup Wizard</title>
+<!-- Syntax Highlighting for the code block -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<style>
+:root {
+--bg: #0f0f13;
+--card: #1a1a24;
+--primary: #7b2cbf;
+--primary-hover: #9d4edd;
+--text: #ffffff;
+--text-muted: #a0a0b0;
+--border: #2a2a3a;
+--success: #00b894;
+--error: #ef4444;
+--cloudflare: #f38020;
+--accent: #00cec9;
+}
+* { box-sizing: border-box; }
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+background-color: var(--bg);
+color: var(--text);
+margin: 0;
+padding: 30px 20px;
+line-height: 1.6;
+min-height: 100vh;
+}
+.container {
+max-width: 900px;
+margin: 0 auto;
+}
+h1 {
+text-align: center;
+color: var(--primary);
+margin-bottom: 10px;
+font-size: 2.2rem;
+}
+.subtitle {
+text-align: center;
+color: var(--text-muted);
+margin-bottom: 40px;
+font-size: 1.05rem;
+}
+/* Progress Bar */
+.progress-bar {
+display: flex;
+justify-content: space-between;
+margin-bottom: 35px;
+position: relative;
+}
+.progress-bar::before {
+content: '';
+position: absolute;
+top: 15px;
+left: 0;
+right: 0;
+height: 2px;
+background: var(--border);
+z-index: 0;
+}
+.progress-fill {
+position: absolute;
+top: 15px;
+left: 0;
+height: 2px;
+background: var(--primary);
+z-index: 0;
+transition: width 0.4s ease;
+width: 0%;
+}
+.progress-step {
+position: relative;
+z-index: 1;
+background: var(--bg);
+padding: 0 10px;
+color: var(--text-muted);
+font-size: 0.85rem;
+display: flex;
+flex-direction: column;
+align-items: center;
+transition: color 0.3s;
+}
+.progress-step .dot {
+width: 32px;
+height: 32px;
+border-radius: 50%;
+background: var(--card);
+border: 2px solid var(--border);
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: bold;
+margin-bottom: 8px;
+transition: all 0.3s;
+}
+.progress-step.active {
+color: var(--primary);
+font-weight: bold;
+}
+.progress-step.active .dot {
+border-color: var(--primary);
+background: var(--primary);
+color: white;
+box-shadow: 0 0 12px rgba(123, 44, 191, 0.4);
+}
+.progress-step:hover .dot {
+border-color: var(--primary-hover);
+transform: scale(1.05);
+}
+/* Steps */
+.step {
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 12px;
+padding: 30px;
+margin-bottom: 25px;
+display: none;
+animation: fadeIn 0.4s ease-out;
+}
+.step.active {
+display: block;
+}
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(15px); }
+to { opacity: 1; transform: translateY(0); }
+}
+.step-header {
+display: flex;
+align-items: center;
+margin-bottom: 25px;
+border-bottom: 1px solid var(--border);
+padding-bottom: 15px;
+}
+.step-number {
+background: var(--primary);
+color: white;
+width: 38px;
+height: 38px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: bold;
+font-size: 1.1rem;
+margin-right: 15px;
+flex-shrink: 0;
+}
+.step-title {
+font-size: 1.3rem;
+font-weight: 600;
+}
+.instruction {
+color: var(--text-muted);
+margin-bottom: 15px;
+font-size: 0.95rem;
+}
+.instruction a {
+color: var(--primary-hover);
+text-decoration: none;
+font-weight: 500;
+}
+.instruction a:hover {
+text-decoration: underline;
+}
+/* Forms */
+.input-group {
+margin-bottom: 20px;
+}
+label {
+display: block;
+margin-bottom: 8px;
+font-weight: 500;
+color: var(--text);
+font-size: 0.95rem;
+}
+input[type="text"], input[type="password"] {
+width: 100%;
+padding: 12px 14px;
+background: var(--bg);
+border: 1px solid var(--border);
+border-radius: 8px;
+color: var(--text);
+font-size: 0.95rem;
+transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus {
+outline: none;
+border-color: var(--primary);
+box-shadow: 0 0 0 3px rgba(123, 44, 191, 0.2);
+}
+/* Buttons */
+.btn-group {
+display: flex;
+gap: 12px;
+margin-top: 20px;
+flex-wrap: wrap;
+}
+.btn {
+background: var(--primary);
+color: white;
+border: none;
+padding: 12px 24px;
+border-radius: 8px;
+font-size: 0.95rem;
+font-weight: 600;
+cursor: pointer;
+transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+text-decoration: none;
+}
+.btn:hover {
+background: var(--primary-hover);
+transform: translateY(-1px);
+box-shadow: 0 4px 12px rgba(123, 44, 191, 0.3);
+}
+.btn:active {
+transform: translateY(0);
+}
+.btn-secondary {
+background: var(--border);
+color: var(--text);
+}
+.btn-secondary:hover {
+background: #3a3a4a;
+box-shadow: none;
+}
+.btn-cloudflare {
+background: var(--cloudflare);
+color: #fff;
+}
+.btn-cloudflare:hover {
+background: #ff9933;
+}
+.btn-success {
+background: var(--success);
+color: #000;
+}
+.btn-success:hover {
+background: #55efc4;
+}
+/* Code Block */
+.code-wrapper {
+position: relative;
+margin: 20px 0;
+border-radius: 8px;
+overflow: hidden;
+border: 1px solid var(--border);
+}
+pre {
+margin: 0 !important;
+padding: 20px !important;
+background: #0d1117 !important;
+max-height: 450px;
+overflow-y: auto;
+font-size: 0.85rem !important;
+line-height: 1.5 !important;
+}
+pre::-webkit-scrollbar { width: 8px; }
+pre::-webkit-scrollbar-track { background: #0d1117; }
+pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+/* Utilities */
+.copy-inline {
+background: var(--bg);
+border: 1px solid var(--border);
+border-radius: 6px;
+padding: 10px 12px;
+font-family: 'Courier New', Courier, monospace;
+color: var(--accent);
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 10px;
+margin: 8px 0 15px 0;
+font-size: 0.9rem;
+word-break: break-all;
+}
+.copy-mini-btn {
+background: var(--border);
+color: var(--text);
+border: none;
+padding: 6px 12px;
+border-radius: 6px;
+cursor: pointer;
+font-size: 0.8rem;
+flex-shrink: 0;
+transition: background 0.2s;
+}
+.copy-mini-btn:hover {
+background: #3a3a4a;
+}
+.warning {
+background: rgba(255, 193, 7, 0.1);
+border-left: 4px solid #ffc107;
+padding: 15px;
+border-radius: 4px;
+margin: 15px 0;
+color: #ffc107;
+font-size: 0.9rem;
+}
+.status {
+margin-top: 15px;
+padding: 14px;
+border-radius: 8px;
+font-size: 0.9rem;
+display: none;
+word-break: break-word;
+}
+.status.success {
+display: block;
+background: rgba(0, 184, 148, 0.15);
+border: 1px solid var(--success);
+color: #55efc4;
+}
+.status.error {
+display: block;
+background: rgba(239, 68, 68, 0.15);
+border: 1px solid var(--error);
+color: #fca5a5;
+}
+.folder-list {
+margin-top: 10px;
+max-height: 250px;
+overflow-y: auto;
+border: 1px solid var(--border);
+padding: 12px;
+border-radius: 8px;
+background: var(--bg);
+display: none;
+}
+.folder-list::-webkit-scrollbar { width: 8px; }
+.folder-list::-webkit-scrollbar-track { background: var(--bg); }
+.folder-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.folder-list::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+.folder-item {
+font-size: 0.9rem;
+margin-bottom: 8px;
+display: flex;
+align-items: center;
+gap: 10px;
+cursor: pointer;
+user-select: none;
+padding: 6px;
+border-radius: 6px;
+}
+.folder-item:hover {
+background: rgba(255, 255, 255, 0.05);
+}
+.folder-item input[type="checkbox"] {
+accent-color: var(--primary);
+cursor: pointer;
+width: 16px;
+height: 16px;
+margin: 0;
+}
+.success-msg {
+color: var(--success);
+font-weight: bold;
+display: none;
+margin-left: 10px;
+font-size: 0.9rem;
+}
+.info-box {
+background: rgba(123, 44, 191, 0.1);
+border: 1px solid var(--primary);
+border-radius: 8px;
+padding: 20px;
+margin: 20px 0;
+}
+.hidden { display: none !important; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚀 Nuvio GDrive Setup Wizard</h1>
-        <p class="subtitle">Quick setup with automatic folder detection and one-click Stremio installation.</p>
+<div class="container">
+<h1>🚀 Nuvio GDrive Setup Wizard</h1>
+<p class="subtitle">Quick setup with automatic folder detection and one-click Stremio installation. (Engine v5.2)</p>
+<div class="progress-bar">
+<div class="progress-fill" id="progressFill"></div>
+<div class="progress-step active" id="prog1"><div class="dot">1</div>Credentials</div>
+<div class="progress-step" id="prog2"><div class="dot">2</div>Generate Code</div>
+<div class="progress-step" id="prog3"><div class="dot">3</div>Branding & Publish</div>
+<div class="progress-step" id="prog4"><div class="dot">4</div>Deploy & Install</div>
+</div>
+<!-- STEP 1 -->
+<div class="step active" id="step1">
+<div class="step-header">
+<div class="step-number">1</div>
+<div class="step-title">Get Your Google Credentials</div>
+</div>
+<p class="instruction">Authorize the addon to read your Google Drive files:</p>
+<div class="instruction">
+<strong>A. Create OAuth Client:</strong><br>
+1. Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console</a>.<br>
+2. Create a <strong>New Project</strong>.<br>
+3. Go to <strong>APIs & Services > Library</strong>, search for <strong>Google Drive API</strong>, and <strong>Enable</strong> it.<br>
+4. Go to <strong>APIs & Services > Credentials</strong>. Click <strong>Create Credentials > OAuth client ID</strong>.<br>
+5. Application type: <strong>Web application</strong>. Name: <code>Nuvio GDrive</code>.<br>
+6. Under <strong>Authorized redirect URIs</strong>, paste this exact URL:<br>
+<div class="copy-inline">
+<span id="currentRedirectUri">https://wmaeve07.github.io/nuvio-gdrive-addon/setup.html</span>
+<button class="copy-mini-btn" onclick="copyText(document.getElementById('currentRedirectUri').innerText, this)">Copy</button>
+</div>
+7. Click <strong>Create</strong>. Copy your <strong>Client ID</strong> and <strong>Client Secret</strong>.
+</div>
+<div class="instruction">
+<strong>B. Add Test User:</strong><br>
+1. Open the <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank">OAuth Consent Screen</a>.<br>
+2. Enter <strong>App name</strong> = "Nuvio GDrive" and fill the email fields.<br>
+3. On the <strong>Test users</strong> screen, click <strong>+ ADD USERS</strong> and enter your Gmail address.<br>
+<span class="warning">⚠️ Skipping this causes an immediate "Access Blocked" authorization error.</span>
+</div>
+<div class="instruction">
+<strong>C. Authorize and Select Folders:</strong>
+</div>
+<div class="input-group">
+<label>Client ID</label>
+<input type="text" id="clientId" placeholder="123456789-xxx.apps.googleusercontent.com" oninput="saveCredentials(); generateCode();">
+</div>
+<div class="input-group">
+<label>Client Secret</label>
+<input type="password" id="clientSecret" placeholder="GOCSPX-xxx" oninput="saveCredentials(); generateCode();">
+</div>
+<div class="btn-group">
+<button type="button" class="btn" style="background:#0984e3;" onclick="startOAuthFlow()">🔑 Authorize with Google</button>
+</div>
+<div class="input-group" style="margin-top: 20px;">
+<label>Refresh Token (Auto-populated on return)</label>
+<input type="password" id="refreshToken" placeholder="1//0gABC...longstring..." oninput="generateCode()">
+</div>
+<div class="btn-group">
+<button type="button" class="btn btn-secondary" onclick="testConnection()">🧪 Test Connection & Detect Folders</button>
+</div>
+<div id="statusBox" class="status"></div>
+<!-- SELECTABLE FOLDER LIST -->
+<div id="folderWrapper" class="hidden" style="margin-top:15px;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+<label style="margin:0;">Select Folders to Scan (Leave all unchecked to search your whole Drive):</label>
+<div>
+<button class="copy-mini-btn" onclick="selectAllFolders(true)">Select All</button>
+<button class="copy-mini-btn" onclick="selectAllFolders(false)">Clear</button>
+</div>
+</div>
+<div id="folderList" class="folder-list"></div>
+</div>
+<div class="btn-group" style="justify-content: flex-end; margin-top: 25px;">
+<button class="btn" onclick="goToStep(2)">Next: Generate Custom Code →</button>
+</div>
+</div>
+<!-- STEP 2 -->
+<div class="step" id="step2">
+<div class="step-header">
+<div class="step-number">2</div>
+<div class="step-title">Generate Your Custom Code (v5.2 Engine)</div>
+</div>
+<div class="info-box" style="border-color: var(--accent); background: rgba(0, 206, 201, 0.05); margin-bottom: 20px;">
+<strong style="color: var(--accent);">✨ What's New in v5.2 Engine:</strong>
+<ul style="margin: 8px 0 0 0; padding-left: 20px; color: var(--text-muted); font-size: 0.9rem;">
+<li><strong>Direct Playback:</strong> Streams directly from Google Drive (faster, no Worker bandwidth limits).</li>
+<li><strong>Smarter Caching & Retries:</strong> Handles rate limits and network drops gracefully.</li>
+<li><strong>Increased Limits:</strong> Fetches up to 1000 files for better catalog coverage.</li>
+<li><strong>Token Deduplication:</strong> Prevents concurrent token refresh errors.</li>
+</ul>
+</div>
+<p class="instruction">Credentials and selected folders have been injected automatically into the worker script:</p>
+<label style="margin-top:15px;">Your Addon Code:</label>
+<div class="code-wrapper">
+<pre><code class="language-javascript" id="codeOutput">// Fill in your credentials in Step 1 to generate code...</code></pre>
+</div>
+<div class="btn-group">
+<button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+<button class="btn" id="copyBtn" onclick="copyCode()">📋 Copy Code</button>
+<button class="btn btn-secondary" id="downloadBtn" onclick="downloadCode()">⬇️ Download worker.js</button>
+</div>
+<span class="success-msg" id="copyMsg">Copied to clipboard!</span>
+<div class="btn-group" style="justify-content: flex-end; margin-top: 10px;">
+<button class="btn" onclick="goToStep(3)">I copied the code! Next →</button>
+</div>
+</div>
+<!-- STEP 3 -->
+<div class="step" id="step3">
+<div class="step-header">
+<div class="step-number">3</div>
+<div class="step-title">Keep Token Active (Publish App)</div>
+</div>
+<p class="instruction">Publish your app to prevent Google from expiring your refresh token every 7 days:</p>
+<div class="instruction">
+<strong>A. Fill in App Domain fields:</strong><br>
+1. Go to the <a href="https://console.cloud.google.com/auth/branding" target="_blank">OAuth Branding Page</a> (APIs & Services → OAuth consent screen → Branding).<br>
+2. Paste the URLs below into each required field:
+</div>
+<label>Application home page</label>
+<div class="copy-inline"><span>https://nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('https://nuvio.tv', this)">Copy</button></div>
+<label>Application privacy policy link</label>
+<div class="copy-inline"><span>https://nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('https://nuvio.tv', this)">Copy</button></div>
+<label>Application Terms of Service link</label>
+<div class="copy-inline"><span>https://nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('https://nuvio.tv', this)">Copy</button></div>
+<label>Authorised domain</label>
+<div class="copy-inline"><span>nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('nuvio.tv', this)">Copy</button></div>
+<div class="instruction" style="margin-top: 20px;">
+3. Click <strong>Save</strong> at the bottom of the page.<br><br>
+<strong>B. Publish the app:</strong><br>
+1. Click the <a href="https://console.cloud.google.com/auth/audience" target="_blank">Audience tab</a> in the left sidebar.<br>
+2. Click <strong>Publish App</strong> and confirm when prompted.
+</div>
+<div class="btn-group">
+<button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
+<button class="btn" onclick="goToStep(4)">Done — Deploy & Install →</button>
+</div>
+</div>
+<!-- STEP 4 -->
+<div class="step" id="step4">
+<div class="step-header">
+<div class="step-number">4</div>
+<div class="step-title">Deploy & 1-Click Install</div>
+</div>
+<div class="info-box">
+<strong>Deploy to Cloudflare Workers:</strong><br>
+Open Cloudflare to create and save your worker.
+<div class="btn-group" style="margin-top: 15px;">
+<a href="https://dash.cloudflare.com/?to=/:account/workers-and-pages/create" target="_blank" class="btn btn-cloudflare">
+🚀 Open Cloudflare Workers Dashboard
+</a>
+</div>
+</div>
+<div class="instruction" style="margin-top: 20px;">
+1. Click <strong>Create Worker</strong>.<br>
+2. Click <strong>Deploy</strong>, then select <strong>Edit Code</strong>.<br>
+3. Clear the editor, paste your copied code from Step 2, and click <strong>Save and Deploy</strong>.<br>
+4. Copy the URL assigned to your worker (e.g., <code>https://my-addon.yourname.workers.dev</code>).
+</div>
+<div class="warning" style="background: rgba(0, 206, 201, 0.1); border-left-color: var(--accent); color: var(--accent); margin-top: 15px;">
+<strong>💡 Security Tip:</strong> Your credentials are hardcoded in the script for easy setup. For maximum security, you can leave the placeholders in the code and instead add <code>CLIENT_ID</code>, <code>CLIENT_SECRET</code>, and <code>REFRESH_TOKEN</code> as <strong>Environment Variables</strong> in your Cloudflare Worker settings.
+</div>
+<div class="info-box" style="border-color: var(--success); background: rgba(0, 184, 148, 0.1); margin-top: 20px;">
+<strong>⚡ Instant Stremio / Nuvio Installer:</strong>
+<p style="margin: 6px 0 12px 0; font-size: 0.9rem; color: var(--text-muted);">
+Paste your deployed Worker URL below to generate an automatic 1-click install button:
+</p>
+<input type="text" id="deployedWorkerUrl" placeholder="https://my-addon.yourname.workers.dev" oninput="updateInstallerLinks()" style="margin-bottom: 10px;">
+<div id="installButtonContainer" class="hidden btn-group">
+<a href="#" id="stremioDeepLink" class="btn btn-success">
+📲 Install Directly to Stremio / Nuvio
+</a>
+<button class="btn btn-secondary" onclick="copyManifestLink()">
+📋 Copy Manifest Link
+</button>
+</div>
+</div>
+<div class="btn-group">
+<button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
+</div>
+</div>
+</div>
 
-        <div class="progress-bar">
-            <div class="progress-step active" id="prog1"><div class="dot">1</div>Credentials</div>
-            <div class="progress-step" id="prog2"><div class="dot">2</div>Generate Code</div>
-            <div class="progress-step" id="prog3"><div class="dot">3</div>Branding & Publish</div>
-            <div class="progress-step" id="prog4"><div class="dot">4</div>Deploy & Install</div>
-        </div>
-
-        <!-- STEP 1 -->
-        <div class="step active" id="step1">
-            <div class="step-header">
-                <div class="step-number">1</div>
-                <div class="step-title">Get Your Google Credentials</div>
-            </div>
-            <p class="instruction">Authorize the addon to read your Google Drive files:</p>
-            
-            <div class="instruction">
-                <strong>A. Create OAuth Client:</strong><br>
-                1. Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console</a>.<br>
-                2. Create a <strong>New Project</strong>.<br>
-                3. Go to <strong>APIs & Services > Library</strong>, search for <strong>Google Drive API</strong>, and <strong>Enable</strong> it.<br>
-                4. Go to <strong>APIs & Services > Credentials</strong>. Click <strong>Create Credentials > OAuth client ID</strong>.<br>
-                5. Application type: <strong>Web application</strong>. Name: <code>Nuvio GDrive</code>.<br>
-                6. Under <strong>Authorized redirect URIs</strong>, paste this exact URL:<br>
-                <div class="copy-inline">
-                    <span id="currentRedirectUri">https://wmaeve07.github.io/nuvio-gdrive-addon/setup.html</span>
-                    <button class="copy-mini-btn" onclick="copyText(document.getElementById('currentRedirectUri').innerText, this)">Copy</button>
-                </div>
-                7. Click <strong>Create</strong>. Copy your <strong>Client ID</strong> and <strong>Client Secret</strong>.
-            </div>
-
-            <div class="instruction">
-                <strong>B. Add Test User:</strong><br>
-                1. Open the <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank">OAuth Consent Screen</a>.<br>
-                2. Enter <strong>App name</strong> = "Nuvio GDrive" and fill the email fields.<br>
-                3. On the <strong>Test users</strong> screen, click <strong>+ ADD USERS</strong> and enter your Gmail address.<br>
-                <span class="warning">⚠️ Skipping this causes an immediate "Access Blocked" authorization error.</span>
-            </div>
-
-            <div class="instruction">
-                <strong>C. Authorize and Select Folders:</strong>
-            </div>
-
-            <div class="input-group">
-                <label>Client ID</label>
-                <input type="text" id="clientId" placeholder="123456789-xxx.apps.googleusercontent.com" oninput="saveCredentials(); generateCode();">
-            </div>
-            <div class="input-group">
-                <label>Client Secret</label>
-                <input type="password" id="clientSecret" placeholder="GOCSPX-xxx" oninput="saveCredentials(); generateCode();">
-            </div>
-
-            <div class="btn-group">
-                <button type="button" class="btn" style="background:#0984e3;" onclick="startOAuthFlow()">🔑 Authorize with Google</button>
-            </div>
-
-            <div class="input-group" style="margin-top: 20px;">
-                <label>Refresh Token (Auto-populated on return)</label>
-                <input type="password" id="refreshToken" placeholder="1//0gABC...longstring..." oninput="generateCode()">
-            </div>
-
-            <div class="btn-group">
-                <button type="button" class="btn btn-secondary" onclick="testConnection()">🧪 Test Connection & Detect Folders</button>
-            </div>
-
-            <div id="statusBox" class="status"></div>
-            
-            <!-- SELECTABLE FOLDER LIST -->
-            <div id="folderWrapper" class="hidden" style="margin-top:15px;">
-                <label>Select Folders to Scan (Leave all unchecked to search your whole Drive):</label>
-                <div id="folderList" class="folder-list"></div>
-            </div>
-
-            <div class="btn-group" style="justify-content: flex-end; margin-top: 25px;">
-                <button class="btn" onclick="goToStep(2)">Next: Generate Custom Code →</button>
-            </div>
-        </div>
-
-        <!-- STEP 2 -->
-        <div class="step" id="step2">
-            <div class="step-header">
-                <div class="step-number">2</div>
-                <div class="step-title">Generate Your Custom Code (v5.1 Engine)</div>
-            </div>
-            <p class="instruction">Credentials and selected folders have been injected automatically into the worker script:</p>
-
-            <label style="margin-top:15px;">Your Addon Code:</label>
-            <div class="code-wrapper">
-                <pre><code class="language-javascript" id="codeOutput">// Fill in your credentials in Step 1 to generate code...</code></pre>
-            </div>
-            
-            <div class="btn-group">
-                <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
-                <button class="btn" id="copyBtn" onclick="copyCode()">📋 Copy Code</button>
-            </div>
-            <span class="success-msg" id="copyMsg">Copied to clipboard!</span>
-            
-            <div class="btn-group" style="justify-content: flex-end; margin-top: 10px;">
-                <button class="btn" onclick="goToStep(3)">I copied the code! Next →</button>
-            </div>
-        </div>
-
-        <!-- STEP 3 -->
-        <div class="step" id="step3">
-            <div class="step-header">
-                <div class="step-number">3</div>
-                <div class="step-title">Keep Token Active (Publish App)</div>
-            </div>
-            <p class="instruction">Publish your app to prevent Google from expiring your refresh token every 7 days:</p>
-
-            <div class="instruction">
-                <strong>A. Fill in App Domain fields:</strong><br>
-                1. Go to the <a href="https://console.cloud.google.com/auth/branding" target="_blank">OAuth Branding Page</a> (APIs & Services → OAuth consent screen → Branding).<br>
-                2. Paste the URLs below into each required field:
-            </div>
-
-            <label>Application home page</label>
-            <div class="copy-inline"><span>https://nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('https://nuvio.tv', this)">Copy</button></div>
-
-            <label>Application privacy policy link</label>
-            <div class="copy-inline"><span>https://nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('https://nuvio.tv', this)">Copy</button></div>
-
-            <label>Application Terms of Service link</label>
-            <div class="copy-inline"><span>https://nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('https://nuvio.tv', this)">Copy</button></div>
-
-            <label>Authorised domain</label>
-            <div class="copy-inline"><span>nuvio.tv</span><button class="copy-mini-btn" onclick="copyText('nuvio.tv', this)">Copy</button></div>
-
-            <div class="instruction" style="margin-top: 20px;">
-                3. Click <strong>Save</strong> at the bottom of the page.<br><br>
-                <strong>B. Publish the app:</strong><br>
-                1. Click the <a href="https://console.cloud.google.com/auth/audience" target="_blank">Audience tab</a> in the left sidebar.<br>
-                2. Click <strong>Publish App</strong> and confirm when prompted.
-            </div>
-
-            <div class="btn-group">
-                <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
-                <button class="btn" onclick="goToStep(4)">Done — Deploy & Install →</button>
-            </div>
-        </div>
-
-        <!-- STEP 4 -->
-        <div class="step" id="step4">
-            <div class="step-header">
-                <div class="step-number">4</div>
-                <div class="step-title">Deploy & 1-Click Install</div>
-            </div>
-            
-            <div class="info-box">
-                <strong>Deploy to Cloudflare Workers:</strong><br>
-                Open Cloudflare to create and save your worker.
-                <div class="btn-group" style="margin-top: 15px;">
-                    <a href="https://dash.cloudflare.com/?to=/:account/workers-and-pages/create" target="_blank" class="btn btn-cloudflare">
-                        🚀 Open Cloudflare Workers Dashboard
-                    </a>
-                </div>
-            </div>
-
-            <div class="instruction" style="margin-top: 20px;">
-                1. Click <strong>Create Worker</strong>.<br>
-                2. Click <strong>Deploy</strong>, then select <strong>Edit Code</strong>.<br>
-                3. Clear the editor, paste your copied code from Step 2, and click <strong>Save and Deploy</strong>.<br>
-                4. Copy the URL assigned to your worker (e.g., <code>https://my-addon.yourname.workers.dev</code>).
-            </div>
-
-            <div class="info-box" style="border-color: var(--success); background: rgba(0, 184, 148, 0.1);">
-                <strong>⚡ Instant Stremio / Nuvio Installer:</strong>
-                <p style="margin: 6px 0 12px 0; font-size: 0.9rem; color: var(--text-muted);">
-                    Paste your deployed Worker URL below to generate an automatic 1-click install button:
-                </p>
-                
-                <input type="text" id="deployedWorkerUrl" placeholder="https://my-addon.yourname.workers.dev" oninput="updateInstallerLinks()" style="margin-bottom: 10px;">
-                
-                <div id="installButtonContainer" class="hidden btn-group">
-                    <a href="#" id="stremioDeepLink" class="btn btn-success">
-                        📲 Install Directly to Stremio / Nuvio
-                    </a>
-                    <button class="btn btn-secondary" onclick="copyManifestLink()">
-                        📋 Copy Manifest Link
-                    </button>
-                </div>
-            </div>
-
-            <div class="btn-group">
-                <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Explicitly set to the requested GitHub Pages URL
-        const redirectUri = "https://wmaeve07.github.io/nuvio-gdrive-addon/setup.html";
-        document.getElementById("currentRedirectUri").innerText = redirectUri;
-
-        let selectedFolderIds = [];
-
-        const baseCode = `const CONFIG = {
-  addonName: "Gdrive 5.1",
-  resolutions: ["2160p", "1080p", "720p", "480p", "Unknown"],
-  qualities: [
-    "BluRay REMUX", "BluRay", "WEB-DL", "WEBRip", "HDRip", 
-    "HC HD-Rip", "DVDRip", "HDTV", "CAM", "Unknown"
-  ],
-  visualTags: ["HDR10+", "HDR10", "HDR", "DV", "IMAX", "AI"],
-  sortBy: ["resolution", "visualTag", "size", "quality"],
-  showAudioFiles: false,
-  considerHdrTagsAsEqual: true,
-  prioritiseLanguage: null,
-  proxiedPlayback: true,
-  strictTitleCheck: false,
-  maxFilesToFetch: 200,
-  driveFolderIds: DRIVE_FOLDERS_PLACEHOLDER,
-  tmdbApiKey: "aa268f21c12be3374a08b7deafad3f6d",
-  clientId: "CLIENT_ID_PLACEHOLDER",
-  clientSecret: "CLIENT_SECRET_PLACEHOLDER",
-  refreshToken: "REFRESH_TOKEN_PLACEHOLDER"
+<!-- BASE CODE TEMPLATE (No escaping needed!) -->
+<script type="text/plain" id="baseCodeTemplate">
+const CONFIG = {
+addonName: "Gdrive 5.2",
+resolutions: ["2160p", "1080p", "720p", "480p", "Unknown"],
+qualities: [
+"BluRay REMUX", "BluRay", "WEB-DL", "WEBRip", "HDRip",
+"HC HD-Rip", "DVDRip", "HDTV", "CAM", "Unknown"
+],
+visualTags: ["HDR10+", "HDR10", "HDR", "DV", "IMAX", "AI"],
+sortBy: ["resolution", "visualTag", "size", "quality"],
+showAudioFiles: false,
+considerHdrTagsAsEqual: true,
+prioritiseLanguage: null, // e.g. "English" or "Hindi"
+proxiedPlayback: false, // false = player streams straight from Google Drive (no Worker in between). Set true to go back to the proxy.
+strictTitleCheck: false,
+maxFilesToFetch: 1000,
+driveFolderIds: DRIVE_FOLDERS_PLACEHOLDER,
+tmdbApiKey: "aa268f21c12be3374a08b7deafad3f6d",
+clientId: "CLIENT_ID_PLACEHOLDER",
+clientSecret: "CLIENT_SECRET_PLACEHOLDER",
+refreshToken: "REFRESH_TOKEN_PLACEHOLDER"
 };
-
+// --- In-Memory Caching ---
 const streamCache = new Map();
 const catalogCache = new Map();
 const STREAM_CACHE_TTL = 15 * 60 * 1000;
 const CATALOG_CACHE_TTL = 5 * 60 * 1000;
-
+// --- Token Management ---
 let cachedAccessToken = null;
 let tokenExpiryTime = 0;
-
+let tokenPromise = null; // dedupes concurrent refreshes
 const HEADERS = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
-  "Access-Control-Max-Age": "86400",
-  "Access-Control-Allow-Headers": "Content-Type, Range, Authorization",
+"Content-Type": "application/json",
+"Access-Control-Allow-Origin": "*",
+"Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
+"Access-Control-Max-Age": "86400",
+"Access-Control-Allow-Headers": "Content-Type, Range, Authorization",
 };
-
 const API = {
-  DRIVE_FILES: "https://content.googleapis.com/drive/v3/files",
-  DRIVE_FILE: "https://content.googleapis.com/drive/v3/files/{fileId}",
-  DRIVE_STREAM: "https://www.googleapis.com/drive/v3/files/{fileId}?alt=media&ack_abort=1",
-  DRIVE_TOKEN: "https://oauth2.googleapis.com/token",
-  CINEMETA: "https://v3-cinemeta.strem.io/meta/{type}/{id}.json",
-  TMDB_FIND: "https://api.themoviedb.org/3/find/{id}?api_key={apiKey}&external_source=imdb_id",
-  IMDB_SUGGEST: "https://v3.sg.media-imdb.com/suggestion/a/{id}.json",
+DRIVE_FILES: "https://content.googleapis.com/drive/v3/files",
+DRIVE_FILE: "https://content.googleapis.com/drive/v3/files/{fileId}",
+DRIVE_STREAM: "https://www.googleapis.com/drive/v3/files/{fileId}?alt=media&supportsAllDrives=true&acknowledgeAbuse=true",
+DRIVE_TOKEN: "https://oauth2.googleapis.com/token",
+CINEMETA: "https://v3-cinemeta.strem.io/meta/{type}/{id}.json",
+TMDB_FIND: "https://api.themoviedb.org/3/find/{id}?api_key={apiKey}&external_source=imdb_id",
+IMDB_SUGGEST: "https://v3.sg.media-imdb.com/suggestion/a/{id}.json",
 };
-
+const FILE_FIELDS = "id,name,size,videoMediaMetadata,mimeType,fileExtension,thumbnailLink,createdTime";
+const MIME_BY_EXT = {
+mkv: "video/x-matroska",
+mp4: "video/mp4",
+m4v: "video/mp4",
+mov: "video/quicktime",
+avi: "video/x-msvideo",
+webm: "video/webm",
+ts: "video/mp2t",
+wmv: "video/x-ms-wmv",
+};
 const REGEX = {
-  stream: /\\/stream\\/(movie|series|anime)\\/([a-zA-Z0-9%:\\-_]+)\\.json/,
-  catalog: /\\/catalog\\/(movie|series)\\/([a-zA-Z0-9%:\\-_]+)(\\/search=(.+))?\\.json/,
-  meta: /\\/meta\\/(movie|series)\\/([a-zA-Z0-9%:\\-_]+)\\.json/,
-  playback: /\\/playback\\/([a-zA-Z0-9%:\\-_]+)\\/(.+)/,
-  resolutions: {
-    "2160p": /(?<![^ [(_\\-.])(4k|2160p|uhd)(?=[ \\)\\]_.-]|$)/i,
-    "1080p": /(?<![^ [(_\\-.])(1080p|fhd)(?=[ \\)\\]_.-]|$)/i,
-    "720p": /(?<![^ [(_\\-.])(720p|hd)(?=[ \\)\\]_.-]|$)/i,
-    "480p": /(?<![^ [(_\\-.])(480p|sd)(?=[ \\)\\]_.-]|$)/i,
-  },
-  qualities: {
-    "BluRay REMUX": /(?<![^ [(_\\-.])((blu[ .\\-_]?ray|bd|br|b|uhd)[ .\\-_]?remux)(?=[ \\)\\]_.-]|$)/i,
-    "BluRay": /(?<![^ [(_\\-.])(blu[ .\\-_]?ray|((bd|br|b|uhd)[ .\\-_]?(rip|r)?))(?![ .\\-_]?remux)(?=[ \\)\\]_.-]|$)/i,
-    "WEB-DL": /(?<![^ [(_\\-.])(web[ .\\-_]?(dl)?)(?![ .\\-_]?DLRip)(?=[ \\)\\]_.-]|$)/i,
-    "WEBRip": /(?<![^ [(_\\-.])(web[ .\\-_]?rip)(?=[ \\)\\]_.-]|$)/i,
-    "HDRip": /(?<![^ [(_\\-.])(hd[ .\\-_]?rip|web[ .\\-_]?dl[ .\\-_]?rip)(?=[ \\)\\]_.-]|$)/i,
-    "HC HD-Rip": /(?<![^ [(_\\-.])(hc|hd[ .\\-_]?rip)(?=[ \\)\\]_.-]|$)/i,
-    "DVDRip": /(?<![^ [(_\\-.])(dvd[ .\\-_]?(rip|mux|r|full|5|9))(?=[ \\)\\]_.-]|$)/i,
-    "HDTV": /(?<![^ [(_\\-.])((hd|pd)tv|tv[ .\\-_]?rip|hdtv[ .\\-_]?rip|dsr(ip)?|sat[ .\\-_]?rip)(?=[ \\)\\]_.-]|$)/i,
-  },
-  visualTags: {
-    "HDR10+": /(?<![^ [(_\\-.])(hdr[ .\\-_]?(10|ten)[ .\\-_]?([+]|plus))(?=[ \\)\\]_.-]|$)/i,
-    "HDR10": /(?<![^ [(_\\-.])(hdr10)(?![+])(?=[ \\)\\]_.-]|$)/i,
-    "HDR": /(?<![^ [(_\\-.])(hdr)(?!(10|ten|\\+))(?=[ \\)\\]_.-]|$)/i,
-    "DV": /(?<![^ [(_\\-.])(dolby[ .\\-_]?vision|dv)(?=[ \\)\\]_.-]|$)/i,
-    "IMAX": /(?<![^ [(_\\-.])(imax)(?=[ \\)\\]_.-]|$)/i,
-  },
-  audioTags: {
-    "Atmos": /(?<![^ [(_\\-.])(atmos)(?=[ \\)\\]_.-]|$)/i,
-    "TrueHD": /(?<![^ [(_\\-.])(true[ .\\-_]?hd)(?=[ \\)\\]_.-]|$)/i,
-    "DTS-HD MA": /(?<![^ [(_\\-.])(dts[ .\\-_]?hd[ .\\-_]?ma)(?=[ \\)\\]_.-]|$)/i,
-    "DTS-HD": /(?<![^ [(_\\-.])(dts[ .\\-_]?hd)(?![ .\\-_]?ma)(?=[ \\)\\]_.-]|$)/i,
-    "DD+": /(?<![^ [(_\\-.])(dd\\+|ddp|dolby[ .\\-_]?digital[ .\\-_]?plus|eac3)(?=[ \\)\\]_.-]|$)/i,
-    "DD": /(?<![^ [(_\\-.])(dd|dolby[ .\\-_]?digital|ac3)(?![+p])(?=[ \\)\\]_.-]|$)/i,
-  },
-  languages: {
-    "Multi": /(?<![^ [(_\\-.])(multi|multi[ .\\-_]?audio)(?=[ \\)\\]_.-]|$)/i,
-    "Dual Audio": /(?<![^ [(_\\-.])(dual[ .\\-_]?audio)(?=[ \\)\\]_.-]|$)/i,
-    "English": /(?<![^ [(_\\-.])(english|eng)(?=[ \\)\\]_.-]|$)/i,
-    "Hindi": /(?<![^ [(_\\-.])(hindi|hin)(?=[ \\)\\]_.-]|$)/i,
-    "Japanese": /(?<![^ [(_\\-.])(japanese|jap)(?=[ \\)\\]_.-]|$)/i,
-    "Spanish": /(?<![^ [(_\\-.])(spanish|spa)(?=[ \\)\\]_.-]|$)/i,
-    "French": /(?<![^ [(_\\-.])(french|fra)(?=[ \\)\\]_.-]|$)/i,
-    "German": /(?<![^ [(_\\-.])(german|ger)(?=[ \\)\\]_.-]|$)/i,
-    "Russian": /(?<![^ [(_\\-.])(russian|rus)(?=[ \\)\\]_.-]|$)/i,
-    "Chinese": /(?<![^ [(_\\-.])(chinese|chi)(?=[ \\)\\]_.-]|$)/i,
-    "Korean": /(?<![^ [(_\\-.])(korean|kor)(?=[ \\)\\]_.-]|$)/i,
-  },
-  encodes: {
-    "HEVC (x265)": /(?<![^ [(_\\-.])(hevc|x265|h265|h\\.265)(?=[ \\)\\]_.-]|$)/i,
-    "AVC (x264)": /(?<![^ [(_\\-.])(avc|x264|h264|h\\.264)(?=[ \\)\\]_.-]|$)/i,
-    "AV1": /(?<![^ [(_\\-.])(av1)(?=[ \\)\\]_.-]|$)/i,
-  }
+stream: /\/stream\/(movie|series|anime)\/([a-zA-Z0-9%:\-_]+)\.json/,
+catalog: /\/catalog\/(movie|series)\/([a-zA-Z0-9%:\-_]+)(\/search=(.+))?\.json/,
+meta: /\/meta\/(movie|series)\/([a-zA-Z0-9%:\-_]+)\.json/,
+playback: /\/playback\/([a-zA-Z0-9%:\-_]+)\/(.+)/,
+resolutions: {
+"2160p": /(?<![^ [(_\-.])(4k|2160p|uhd)(?=[ \)\]_.-]|$)/i,
+"1080p": /(?<![^ [(_\-.])(1080p|fhd)(?=[ \)\]_.-]|$)/i,
+"720p": /(?<![^ [(_\-.])(720p|hd)(?=[ \)\]_.-]|$)/i,
+"480p": /(?<![^ [(_\-.])(480p|sd)(?=[ \)\]_.-]|$)/i,
+},
+qualities: {
+"BluRay REMUX": /(?<![^ [(_\-.])((blu[ .\-_]?ray|bd|br|b|uhd)[ .\-_]?remux)(?=[ \)\]_.-]|$)/i,
+"BluRay": /(?<![^ [(_\-.])(blu[ .\-_]?ray|((bd|br|b|uhd)[ .\-_]?(rip|r)?))(?![ .\-_]?remux)(?=[ \)\]_.-]|$)/i,
+"WEB-DL": /(?<![^ [(_\-.])(web[ .\-_]?(dl)?)(?![ .\-_]?DLRip)(?=[ \)\]_.-]|$)/i,
+"WEBRip": /(?<![^ [(_\-.])(web[ .\-_]?rip)(?=[ \)\]_.-]|$)/i,
+"HDRip": /(?<![^ [(_\-.])(hd[ .\-_]?rip|web[ .\-_]?dl[ .\-_]?rip)(?=[ \)\]_.-]|$)/i,
+"HC HD-Rip": /(?<![^ [(_\-.])(hc|hd[ .\-_]?rip)(?=[ \)\]_.-]|$)/i,
+"DVDRip": /(?<![^ [(_\-.])(dvd[ .\-_]?(rip|mux|r|full|5|9))(?=[ \)\]_.-]|$)/i,
+"HDTV": /(?<![^ [(_\-.])((hd|pd)tv|tv[ .\-_]?rip|hdtv[ .\-_]?rip|dsr(ip)?|sat[ .\-_]?rip)(?=[ \)\]_.-]|$)/i,
+},
+visualTags: {
+"HDR10+": /(?<![^ [(_\-.])(hdr[ .\-_]?(10|ten)[ .\-_]?([+]|plus))(?=[ \)\]_.-]|$)/i,
+"HDR10": /(?<![^ [(_\-.])(hdr10)(?![+])(?=[ \)\]_.-]|$)/i,
+"HDR": /(?<![^ [(_\-.])(hdr)(?!(10|ten|\+))(?=[ \)\]_.-]|$)/i,
+"DV": /(?<![^ [(_\-.])(dolby[ .\-_]?vision|dv)(?=[ \)\]_.-]|$)/i,
+"IMAX": /(?<![^ [(_\-.])(imax)(?=[ \)\]_.-]|$)/i,
+},
+audioTags: {
+"Atmos": /(?<![^ [(_\-.])(atmos)(?=[ \)\]_.-]|$)/i,
+"TrueHD": /(?<![^ [(_\-.])(true[ .\-_]?hd)(?=[ \)\]_.-]|$)/i,
+"DTS-HD MA": /(?<![^ [(_\-.])(dts[ .\-_]?hd[ .\-_]?ma)(?=[ \)\]_.-]|$)/i,
+"DTS-HD": /(?<![^ [(_\-.])(dts[ .\-_]?hd)(?![ .\-_]?ma)(?=[ \)\]_.-]|$)/i,
+"DD+": /(?<![^ [(_\-.])(dd\+|ddp|dolby[ .\-_]?digital[ .\-_]?plus|eac3)(?=[ \)\]_.-]|$)/i,
+"DD": /(?<![^ [(_\-.])(dd|dolby[ .\-_]?digital|ac3)(?![+p])(?=[ \)\]_.-]|$)/i,
+},
+languages: {
+"Multi": /(?<![^ [(_\-.])(multi|multi[ .\-_]?audio)(?=[ \)\]_.-]|$)/i,
+"Dual Audio": /(?<![^ [(_\-.])(dual[ .\-_]?audio)(?=[ \)\]_.-]|$)/i,
+"English": /(?<![^ [(_\-.])(english|eng)(?=[ \)\]_.-]|$)/i,
+"Hindi": /(?<![^ [(_\-.])(hindi|hin)(?=[ \)\]_.-]|$)/i,
+"Japanese": /(?<![^ [(_\-.])(japanese|jap)(?=[ \)\]_.-]|$)/i,
+"Spanish": /(?<![^ [(_\-.])(spanish|spa)(?=[ \)\]_.-]|$)/i,
+"French": /(?<![^ [(_\-.])(french|fra)(?=[ \)\]_.-]|$)/i,
+"German": /(?<![^ [(_\-.])(german|ger)(?=[ \)\]_.-]|$)/i,
+"Russian": /(?<![^ [(_\-.])(russian|rus)(?=[ \)\]_.-]|$)/i,
+"Chinese": /(?<![^ [(_\-.])(chinese|chi)(?=[ \)\]_.-]|$)/i,
+"Korean": /(?<![^ [(_\-.])(korean|kor)(?=[ \)\]_.-]|$)/i,
+},
+encodes: {
+"HEVC (x265)": /(?<![^ [(_\-.])(hevc|x265|h265|h\.265)(?=[ \)\]_.-]|$)/i,
+"AVC (x264)": /(?<![^ [(_\-.])(avc|x264|h264|h\.264)(?=[ \)\]_.-]|$)/i,
+"AV1": /(?<![^ [(_\-.])(av1)(?=[ \)\]_.-]|$)/i,
+}
 };
-
 function formatSize(bytes) {
-  if (!bytes || bytes === 0) return "0 B";
-  const k = 1000;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+if (!bytes || bytes === 0) return "0 B";
+const k = 1000;
+const sizes = ["B", "KB", "MB", "GB", "TB"];
+const i = Math.floor(Math.log(bytes) / Math.log(k));
+return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
-
 function formatDuration(durationMillis) {
-  if (!durationMillis) return "";
-  const seconds = Math.floor(durationMillis / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  return \`\${hours}h \${minutes % 60}m\`;
+if (!durationMillis) return "";
+const seconds = Math.floor(durationMillis / 1000);
+const minutes = Math.floor(seconds / 60);
+const hours = Math.floor(minutes / 60);
+return `${hours}h ${minutes % 60}m`;
 }
-
 function escapeDriveQuery(str) {
-  return str.replace(/\\\\/g, "\\\\\\\\").replace(/'/g, "\\\\'");
+return str.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 }
-
 function parseFile(file) {
-  let resolution = Object.entries(REGEX.resolutions).find(([_, p]) => p.test(file.name))?.[0] || "Unknown";
-  let quality = Object.entries(REGEX.qualities).find(([_, p]) => p.test(file.name))?.[0] || "Unknown";
-  let visualTags = Object.entries(REGEX.visualTags).filter(([_, p]) => p.test(file.name)).map(([tag]) => tag);
-  let audioTags = Object.entries(REGEX.audioTags).filter(([_, p]) => p.test(file.name)).map(([tag]) => tag);
-  let languages = Object.entries(REGEX.languages).filter(([_, p]) => p.test(file.name)).map(([tag]) => tag);
-  let encode = Object.entries(REGEX.encodes).find(([_, p]) => p.test(file.name))?.[0] || "";
-
-  if (visualTags.includes("HDR10+")) visualTags = visualTags.filter(t => t !== "HDR" && t !== "HDR10");
-  else if (visualTags.includes("HDR10")) visualTags = visualTags.filter(t => t !== "HDR");
-
-  let type = "movie";
-  let season = null;
-  let episode = null;
-  
-  const seriesMatch = file.name.match(/(?:s|season\\s*)(\\d{1,2})\\s*(?:e|episode\\s*|x|ep\\s*)(\\d{1,3})/i) ||
-                      file.name.match(/(\\d{1,2})\\s*x\\s*(\\d{1,3})/i);
-  
-  if (seriesMatch) {
-    type = "series";
-    season = parseInt(seriesMatch[1]);
-    episode = parseInt(seriesMatch[2]);
-  }
-
-  return {
-    id: file.id,
-    name: file.name.trim(),
-    size: parseInt(file.size) || 0,
-    formattedSize: formatSize(parseInt(file.size)),
-    resolution,
-    quality,
-    visualTags,
-    audioTags,
-    languages,
-    encode,
-    duration: parseInt(file.videoMediaMetadata?.durationMillis) || 0,
-    type,
-    season,
-    episode
-  };
+let resolution = Object.entries(REGEX.resolutions).find(([_, p]) => p.test(file.name))?.[0] || "Unknown";
+let quality = Object.entries(REGEX.qualities).find(([_, p]) => p.test(file.name))?.[0] || "Unknown";
+let visualTags = Object.entries(REGEX.visualTags).filter(([_, p]) => p.test(file.name)).map(([tag]) => tag);
+let audioTags = Object.entries(REGEX.audioTags).filter(([_, p]) => p.test(file.name)).map(([tag]) => tag);
+let languages = Object.entries(REGEX.languages).filter(([_, p]) => p.test(file.name)).map(([tag]) => tag);
+let encode = Object.entries(REGEX.encodes).find(([_, p]) => p.test(file.name))?.[0] || "";
+if (visualTags.includes("HDR10+")) visualTags = visualTags.filter(t => t !== "HDR" && t !== "HDR10");
+else if (visualTags.includes("HDR10")) visualTags = visualTags.filter(t => t !== "HDR");
+let type = "movie";
+let season = null;
+let episode = null;
+const seriesMatch = file.name.match(/(?:s|season\s*)(\d{1,2})\s*(?:e|episode\s*|x|ep\s*)(\d{1,3})/i) ||
+file.name.match(/(\d{1,2})\s*x\s*(\d{1,3})/i);
+if (seriesMatch) {
+type = "series";
+season = parseInt(seriesMatch[1]);
+episode = parseInt(seriesMatch[2]);
 }
-
+return {
+id: file.id,
+name: file.name.trim(),
+size: parseInt(file.size) || 0,
+formattedSize: formatSize(parseInt(file.size)),
+resolution,
+quality,
+visualTags,
+audioTags,
+languages,
+encode,
+duration: parseInt(file.videoMediaMetadata?.durationMillis) || 0,
+type,
+season,
+episode
+};
+}
 function sortStreams(parsedFiles) {
-  const resRanks = { "2160p": 5, "1080p": 4, "720p": 3, "480p": 2, "Unknown": 1 };
-  const qualRanks = {
-    "BluRay REMUX": 9, "BluRay": 8, "WEB-DL": 7, "WEBRip": 6,
-    "HDRip": 5, "HC HD-Rip": 4, "DVDRip": 3, "HDTV": 2, "CAM": 1, "Unknown": 0
-  };
-
-  return parsedFiles.sort((a, b) => {
-    if (CONFIG.prioritiseLanguage) {
-      const aHasLang = a.languages.includes(CONFIG.prioritiseLanguage);
-      const bHasLang = b.languages.includes(CONFIG.prioritiseLanguage);
-      if (aHasLang && !bHasLang) return -1;
-      if (!aHasLang && bHasLang) return 1;
-    }
-
-    const resDiff = (resRanks[b.resolution] || 0) - (resRanks[a.resolution] || 0);
-    if (resDiff !== 0) return resDiff;
-
-    const tagDiff = b.visualTags.length - a.visualTags.length;
-    if (!CONFIG.considerHdrTagsAsEqual && tagDiff !== 0) return tagDiff;
-
-    const qualDiff = (qualRanks[b.quality] || 0) - (qualRanks[a.quality] || 0);
-    if (qualDiff !== 0) return qualDiff;
-
-    return b.size - a.size;
-  });
+const resRanks = { "2160p": 5, "1080p": 4, "720p": 3, "480p": 2, "Unknown": 1 };
+const qualRanks = {
+"BluRay REMUX": 9, "BluRay": 8, "WEB-DL": 7, "WEBRip": 6,
+"HDRip": 5, "HC HD-Rip": 4, "DVDRip": 3, "HDTV": 2, "CAM": 1, "Unknown": 0
+};
+return parsedFiles.sort((a, b) => {
+if (CONFIG.prioritiseLanguage) {
+const aHasLang = a.languages.includes(CONFIG.prioritiseLanguage);
+const bHasLang = b.languages.includes(CONFIG.prioritiseLanguage);
+if (aHasLang && !bHasLang) return -1;
+if (!aHasLang && bHasLang) return 1;
 }
-
-async function getAccessToken(env) {
-  const now = Date.now();
-  if (cachedAccessToken && now < tokenExpiryTime) return cachedAccessToken;
-
-  const clientId = env.CLIENT_ID || CONFIG.clientId;
-  const clientSecret = env.CLIENT_SECRET || CONFIG.clientSecret;
-  const refreshToken = env.REFRESH_TOKEN || CONFIG.refreshToken;
-
-  const params = new URLSearchParams({
-    client_id: clientId,
-    client_secret: clientSecret,
-    refresh_token: refreshToken,
-    grant_type: "refresh_token",
-  });
-
-  const res = await fetch(API.DRIVE_TOKEN, {
-    method: "POST",
-    body: params,
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  });
-
-  if (!res.ok) throw new Error("Failed to get access token: " + await res.text());
-  const data = await res.json();
-  cachedAccessToken = data.access_token;
-  tokenExpiryTime = now + (data.expires_in * 1000) - 60000;
-  return cachedAccessToken;
+const resDiff = (resRanks[b.resolution] || 0) - (resRanks[a.resolution] || 0);
+if (resDiff !== 0) return resDiff;
+const tagDiff = b.visualTags.length - a.visualTags.length;
+if (!CONFIG.considerHdrTagsAsEqual && tagDiff !== 0) return tagDiff;
+const qualDiff = (qualRanks[b.quality] || 0) - (qualRanks[a.quality] || 0);
+if (qualDiff !== 0) return qualDiff;
+return b.size - a.size;
+});
 }
-
+async function getAccessToken(env, forceRefresh = false) {
+const now = Date.now();
+if (!forceRefresh && cachedAccessToken && now < tokenExpiryTime) return cachedAccessToken;
+if (tokenPromise) return tokenPromise;
+tokenPromise = (async () => {
+try {
+const clientId = env.CLIENT_ID || CONFIG.clientId;
+const clientSecret = env.CLIENT_SECRET || CONFIG.clientSecret;
+const refreshToken = env.REFRESH_TOKEN || CONFIG.refreshToken;
+const params = new URLSearchParams({
+client_id: clientId,
+client_secret: clientSecret,
+refresh_token: refreshToken,
+grant_type: "refresh_token",
+});
+const res = await fetch(API.DRIVE_TOKEN, {
+method: "POST",
+body: params,
+headers: { "Content-Type": "application/x-www-form-urlencoded" },
+});
+if (!res.ok) throw new Error("Failed to get access token: " + await res.text());
+const data = await res.json();
+cachedAccessToken = data.access_token;
+tokenExpiryTime = Date.now() + (data.expires_in * 1000) - 60000;
+return cachedAccessToken;
+} finally {
+tokenPromise = null;
+}
+})();
+return tokenPromise;
+}
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+// Returns the final Response (even if it's an error) so callers can decide what to do.
+// Retries on network errors, 429, 5xx, and 403 quota/rate-limit errors.
 async function fetchWithRetry(url, options, maxRetries = 2) {
-  let lastError;
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      const response = await fetch(url, options);
-      if (response.ok || (response.status !== 403 && response.status !== 429)) {
-        return response;
-      }
-      
-      const bodyText = await response.text();
-      const isQuotaError = bodyText.toLowerCase().includes("quota") || 
-                           bodyText.toLowerCase().includes("rate limit") || 
-                           response.status === 429;
-
-      if (!isQuotaError) throw new Error(\`Drive API error \${response.status}: \${bodyText}\`);
-
-      lastError = new Error(\`Rate limited (attempt \${attempt + 1}/\${maxRetries + 1})\`);
-      if (attempt < maxRetries) {
-        const delay = 1000 * Math.pow(2, attempt);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-    } catch (err) {
-      lastError = err;
-      if (attempt < maxRetries) {
-        const delay = 1000 * Math.pow(2, attempt);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-    }
-  }
-  throw lastError || new Error("All retries exhausted");
+let lastError;
+let lastResponse;
+for (let attempt = 0; attempt <= maxRetries; attempt++) {
+try {
+const response = await fetch(url, options);
+if (response.ok) return response;
+let retryable = response.status === 429 || response.status >= 500;
+if (response.status === 403) {
+const bodyText = (await response.clone().text()).toLowerCase();
+retryable = bodyText.includes("quota") || bodyText.includes("rate limit") || bodyText.includes("ratelimit");
 }
-
+lastResponse = response;
+if (!retryable) return response;
+if (attempt < maxRetries) {
+await sleep(1000 * Math.pow(2, attempt));
+}
+} catch (err) {
+if (options?.signal?.aborted) throw err; // client went away, don't retry
+lastError = err;
+if (attempt < maxRetries) {
+await sleep(1000 * Math.pow(2, attempt));
+}
+}
+}
+if (lastResponse) return lastResponse;
+throw lastError || new Error("All retries exhausted");
+}
+async function getFileMeta(fileId, accessToken) {
+const url = new URL(API.DRIVE_FILE.replace("{fileId}", fileId));
+url.searchParams.set("supportsAllDrives", "true");
+url.searchParams.set("fields", FILE_FIELDS);
+const res = await fetchWithRetry(url.toString(), {
+headers: { Authorization: `Bearer ${accessToken}` }
+});
+if (!res.ok) return null;
+return res.json();
+}
 async function fetchFiles(query, env, orderBy = null, cacheType = 'stream') {
-  const accessToken = await getAccessToken(env);
-  const cacheKey = \`\${query}|\${orderBy || ""}\`;
-  const cache = cacheType === 'stream' ? streamCache : catalogCache;
-  const ttl = cacheType === 'stream' ? STREAM_CACHE_TTL : CATALOG_CACHE_TTL;
-
-  const cached = cache.get(cacheKey);
-  if (cached && (Date.now() - cached.timestamp) < ttl) {
-    return { files: cached.files, accessToken, fromCache: true };
-  }
-
-  let allFiles = [];
-  let nextPageToken = null;
-  let pageCount = 0;
-
-  do {
-    const url = new URL(API.DRIVE_FILES);
-    url.searchParams.set("q", query);
-    url.searchParams.set("corpora", "allDrives");
-    url.searchParams.set("includeItemsFromAllDrives", "true");
-    url.searchParams.set("supportsAllDrives", "true");
-    url.searchParams.set("pageSize", "100");
-    if (orderBy) url.searchParams.set("orderBy", orderBy);
-    if (nextPageToken) url.searchParams.set("pageToken", nextPageToken);
-    
-    url.searchParams.set("fields", "files(id,name,size,videoMediaMetadata,mimeType,fileExtension,thumbnailLink,createdTime),nextPageToken");
-
-    const res = await fetchWithRetry(url.toString(), {
-      headers: { Authorization: \`Bearer \${accessToken}\` }
-    });
-
-    if (!res.ok) throw new Error("Failed to fetch files: " + await res.text());
-    const data = await res.json();
-    
-    if (data.files) allFiles = [...allFiles, ...data.files];
-    nextPageToken = data.nextPageToken;
-    pageCount++;
-
-    if (allFiles.length >= CONFIG.maxFilesToFetch || pageCount > 10) break;
-  } while (nextPageToken);
-
-  cache.set(cacheKey, { files: allFiles, timestamp: Date.now() });
-  if (cache.size > 50) {
-    const oldestKey = cache.keys().next().value;
-    cache.delete(oldestKey);
-  }
-
-  return { files: allFiles, accessToken, fromCache: false };
+const accessToken = await getAccessToken(env);
+const cacheKey = `${query}|${orderBy || ""}`;
+const cache = cacheType === 'stream' ? streamCache : catalogCache;
+const ttl = cacheType === 'stream' ? STREAM_CACHE_TTL : CATALOG_CACHE_TTL;
+const cached = cache.get(cacheKey);
+if (cached && (Date.now() - cached.timestamp) < ttl) {
+return { files: cached.files, accessToken, fromCache: true };
 }
-
+let allFiles = [];
+let nextPageToken = null;
+let pageCount = 0;
+do {
+const url = new URL(API.DRIVE_FILES);
+url.searchParams.set("q", query);
+url.searchParams.set("corpora", "allDrives");
+url.searchParams.set("includeItemsFromAllDrives", "true");
+url.searchParams.set("supportsAllDrives", "true");
+url.searchParams.set("pageSize", "100");
+if (orderBy) url.searchParams.set("orderBy", orderBy);
+if (nextPageToken) url.searchParams.set("pageToken", nextPageToken);
+url.searchParams.set("fields", "files(id,name,size,videoMediaMetadata,mimeType,fileExtension,thumbnailLink,createdTime),nextPageToken");
+const res = await fetchWithRetry(url.toString(), {
+headers: { Authorization: `Bearer ${accessToken}` }
+});
+if (!res.ok) throw new Error("Failed to fetch files: " + await res.text());
+const data = await res.json();
+if (data.files) allFiles = [...allFiles, ...data.files];
+nextPageToken = data.nextPageToken;
+pageCount++;
+if (allFiles.length >= CONFIG.maxFilesToFetch || pageCount > 10) break;
+} while (nextPageToken);
+cache.set(cacheKey, { files: allFiles, timestamp: Date.now() });
+if (cache.size > 50) {
+const oldestKey = cache.keys().next().value;
+cache.delete(oldestKey);
+}
+return { files: allFiles, accessToken, fromCache: false };
+}
 function buildStreamQuery(streamRequest) {
-  const { name, year } = streamRequest.metadata;
-  let q = "trashed=false and mimeType contains 'video/' and not name contains 'trailer' and not name contains 'sample'";
-  
-  if (CONFIG.driveFolderIds.length > 0) {
-    q += \` and (\${CONFIG.driveFolderIds.map(id => \`'\${id}' in parents\`).join(' or ')})\`;
-  }
-
-  const sanitisedName = escapeDriveQuery(
-    name.replace(/[^\\p{L}\\p{N}\\s]/gu, " ").replace(/\\s+/g, " ").trim()
-  );
-  
-  if (streamRequest.type === "movie") {
-    q += \` and (name contains '\${sanitisedName}'\`;
-    if (year) q += \` or name contains '\${sanitisedName} \${year}'\`;
-    q += \`)\`;
-  } else {
-    q += \` and (name contains '\${sanitisedName}')\`;
-  }
-  return q;
+const { name, year } = streamRequest.metadata;
+let q = `trashed=false and mimeType contains 'video/' and not name contains 'trailer' and not name contains 'sample'`;
+if (CONFIG.driveFolderIds.length > 0) {
+q += ` and (${CONFIG.driveFolderIds.map(id => `'${id}' in parents`).join(' or ')})`;
 }
-
+const sanitisedName = escapeDriveQuery(
+name.replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim()
+);
+if (streamRequest.type === "movie") {
+q += ` and (name contains '${sanitisedName}'`;
+if (year) q += ` or name contains '${sanitisedName} ${year}'`;
+q += `)`;
+} else {
+q += ` and (name contains '${sanitisedName}')`;
+}
+return q;
+}
 function buildStreamObject(parsed, playbackUrl, accessToken) {
-  const tagList = [];
-  if (parsed.visualTags.length > 0) tagList.push(parsed.visualTags.join("/"));
-  if (parsed.audioTags.includes("Atmos")) tagList.push("ATMOS");
-
-  const titleBadge = tagList.length > 0 
-    ? \`[\${CONFIG.addonName}] \${parsed.resolution} • \${tagList.join(" • ")}\`
-    : \`[\${CONFIG.addonName}] \${parsed.resolution}\`;
-
-  const line1 = [
-    parsed.quality !== "Unknown" ? \`🎬 \${parsed.quality}\` : null,
-    parsed.encode ? \`🎞️ \${parsed.encode}\` : null,
-    \`💾 \${parsed.formattedSize}\`
-  ].filter(Boolean).join("  |  ");
-
-  const line2 = [
-    parsed.audioTags.length > 0 ? \`🎧 \${parsed.audioTags.join(", ")}\` : null,
-    parsed.languages.length > 0 ? \`🌐 \${parsed.languages.join(", ")}\` : null,
-    parsed.duration ? \`⏱️ \${formatDuration(parsed.duration)}\` : null
-  ].filter(Boolean).join("  |  ");
-
-  const description = \`\${line1}\\n\${line2 ? line2 + "\\n" : ""}📁 \${parsed.name}\`;
-
-  const stream = {
-    name: titleBadge,
-    description: description,
-    url: CONFIG.proxiedPlayback ? 
-      \`\${playbackUrl}/\${parsed.id}/\${encodeURIComponent(parsed.name)}\` : 
-      API.DRIVE_STREAM.replace("{fileId}", parsed.id),
-    behaviorHints: { 
-      videoSize: parsed.size, 
-      filename: parsed.name,
-      bingeGroup: \`\${CONFIG.addonName}|\${parsed.resolution}|\${parsed.quality}\`
-    }
-  };
-
-  if (!CONFIG.proxiedPlayback) {
-    stream.behaviorHints.proxyHeaders = { request: { Authorization: \`Bearer \${accessToken}\` } };
-    stream.behaviorHints.notWebReady = true;
-  }
-  return stream;
+const tagList = [];
+if (parsed.visualTags.length > 0) tagList.push(parsed.visualTags.join("/"));
+if (parsed.audioTags.includes("Atmos")) tagList.push("ATMOS");
+const titleBadge = tagList.length > 0
+? `[${CONFIG.addonName}] ${parsed.resolution} • ${tagList.join(" • ")}`
+: `[${CONFIG.addonName}] ${parsed.resolution}`;
+const line1 = [
+parsed.quality !== "Unknown" ? `🎬 ${parsed.quality}` : null,
+parsed.encode ? `🎞️ ${parsed.encode}` : null,
+`💾 ${parsed.formattedSize}`
+].filter(Boolean).join("  |  ");
+const line2 = [
+parsed.audioTags.length > 0 ? `🎧 ${parsed.audioTags.join(", ")}` : null,
+parsed.languages.length > 0 ? `🌐 ${parsed.languages.join(", ")}` : null,
+parsed.duration ? `⏱️ ${formatDuration(parsed.duration)}` : null
+].filter(Boolean).join("  |  ");
+const description = `${line1}
+${line2 ? line2 + "
+" : ""}📁 ${parsed.name}`;
+const stream = {
+name: titleBadge,
+description: description,
+url: CONFIG.proxiedPlayback ?
+`${playbackUrl}/${parsed.id}/${encodeURIComponent(parsed.name)}` :
+API.DRIVE_STREAM.replace("{fileId}", parsed.id),
+behaviorHints: {
+videoSize: parsed.size,
+filename: parsed.name,
+bingeGroup: `${CONFIG.addonName}|${parsed.resolution}|${parsed.quality}`
 }
-
+};
+if (!CONFIG.proxiedPlayback) {
+stream.behaviorHints.proxyHeaders = { request: { Authorization: `Bearer ${accessToken}` } };
+stream.behaviorHints.notWebReady = true;
+}
+return stream;
+}
 async function getMetadata(type, fullId) {
-  try {
-    const cinemetaId = fullId.split(":")[0];
-    const res = await fetch(API.CINEMETA.replace("{type}", type).replace("{id}", cinemetaId));
-    if (res.ok) {
-      const data = await res.json();
-      if (data.meta) return { name: data.meta.name, year: data.meta.year };
-    }
-  } catch (e) {}
-
-  if (CONFIG.tmdbApiKey && (fullId.startsWith("tmdb") || fullId.includes("tt"))) {
-    try {
-      const id = fullId.startsWith("tmdb") ? fullId.split(":")[1] : fullId;
-      const url = API.TMDB_FIND.replace("{id}", id).replace("{apiKey}", CONFIG.tmdbApiKey);
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        const item = data.movie_results?.[0] || data.tv_results?.[0];
-        if (item) return { name: item.title || item.name, year: (item.release_date || item.first_air_date)?.split("-")[0] };
-      }
-    } catch (e) {}
-  }
-
-  try {
-    const imdbId = fullId.split(":")[0];
-    const res = await fetch(API.IMDB_SUGGEST.replace("{id}", imdbId));
-    if (res.ok) {
-      const data = await res.json();
-      const item = data.d?.find(i => i.id === imdbId);
-      if (item) return { name: item.l, year: item.y };
-    }
-  } catch (e) {}
-
-  return null;
+try {
+const cinemetaId = fullId.split(":")[0];
+const res = await fetch(API.CINEMETA.replace("{type}", type).replace("{id}", cinemetaId));
+if (res.ok) {
+const data = await res.json();
+if (data.meta) return { name: data.meta.name, year: data.meta.year };
 }
-
+} catch (e) {}
+if (CONFIG.tmdbApiKey && (fullId.startsWith("tmdb") || fullId.includes("tt"))) {
+try {
+const id = fullId.startsWith("tmdb") ? fullId.split(":")[1] : fullId;
+const url = API.TMDB_FIND.replace("{id}", id).replace("{apiKey}", CONFIG.tmdbApiKey);
+const res = await fetch(url);
+if (res.ok) {
+const data = await res.json();
+const item = data.movie_results?.[0] || data.tv_results?.[0];
+if (item) return { name: item.title || item.name, year: (item.release_date || item.first_air_date)?.split("-")[0] };
+}
+} catch (e) {}
+}
+try {
+const imdbId = fullId.split(":")[0];
+const res = await fetch(API.IMDB_SUGGEST.replace("{id}", imdbId));
+if (res.ok) {
+const data = await res.json();
+const item = data.d?.find(i => i.id === imdbId);
+if (item) return { name: item.l, year: item.y };
+}
+} catch (e) {}
+return null;
+}
+// --- Playback proxy ---
+async function handlePlayback(request, env, fileId, rawName) {
+const isHead = request.method === "HEAD";
+const clientRange = request.headers.get("Range");
+// HEAD is answered by asking Drive for a single byte so we can learn the total size.
+const range = isHead ? "bytes=0-0" : (clientRange || "bytes=0-");
+const streamUrl = API.DRIVE_STREAM.replace("{fileId}", fileId);
+let driveResponse;
+for (let attempt = 0; attempt < 2; attempt++) {
+const accessToken = await getAccessToken(env, attempt > 0);
+driveResponse = await fetchWithRetry(streamUrl, {
+headers: {
+Authorization: `Bearer ${accessToken}`,
+Range: range,
+"Accept-Encoding": "identity",
+},
+// If the player drops the connection, drop the Drive connection too.
+signal: request.signal,
+});
+if (driveResponse.status !== 401) break; // 401 = stale token, refresh once and retry
+}
+const baseHeaders = {
+"Access-Control-Allow-Origin": "*",
+"Access-Control-Expose-Headers": "Content-Range, Content-Length, Accept-Ranges",
+"Accept-Ranges": "bytes",
+"Cache-Control": "no-store",
+};
+// Never throw/return JSON for a failed media request - pass the real status through
+// so the player can retry sensibly instead of caching a bogus "video".
+if (!driveResponse.ok) {
+const errText = await driveResponse.text().catch(() => "");
+console.error(`Drive playback error ${driveResponse.status} for ${fileId}: ${errText.slice(0, 300)}`);
+const h = { ...baseHeaders, "Content-Type": "text/plain" };
+const cr = driveResponse.headers.get("Content-Range");
+if (cr) h["Content-Range"] = cr; // present on 416
+return new Response(`Drive error ${driveResponse.status}`, { status: driveResponse.status, headers: h });
+}
+// Content type: Drive often returns application/octet-stream, which some players dislike.
+let contentType = driveResponse.headers.get("Content-Type") || "";
+if (!contentType.startsWith("video/")) {
+let name = rawName || "";
+try { name = decodeURIComponent(name); } catch (e) {}
+const ext = name.split(".").pop().toLowerCase();
+contentType = MIME_BY_EXT[ext] || "video/mp4";
+}
+const headers = { ...baseHeaders, "Content-Type": contentType };
+const contentRange = driveResponse.headers.get("Content-Range");
+const contentLength = driveResponse.headers.get("Content-Length");
+if (isHead) {
+// Content-Range looks like "bytes 0-0/123456789"
+const total = contentRange?.split("/")[1];
+if (total && total !== "*") headers["Content-Length"] = total;
+await driveResponse.body?.cancel();
+return new Response(null, { status: 200, headers });
+}
+if (contentRange) headers["Content-Range"] = contentRange;
+if (contentLength) headers["Content-Length"] = contentLength;
+return new Response(driveResponse.body, {
+status: driveResponse.status, // 206 for ranged, 200 otherwise
+headers,
+});
+}
 async function handleRequest(request, env, ctx) {
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: HEADERS });
-  }
+if (request.method === "OPTIONS") {
+return new Response(null, { status: 204, headers: HEADERS });
+}
+const url = new URL(request.url);
+const playbackUrl = url.origin + "/playback";
+if (url.pathname === "/manifest.json" || url.pathname === "/") {
+const manifest = {
+id: "test.gdrive.rocksolid.v5",
+version: "5.2.0",
+name: CONFIG.addonName,
+description: "Fast, cached, auto-sorted Google Drive catalog for Stremio.",
+catalogs: [
+{ type: "movie", id: "gdrive_recent_movies", name: "Recently Added Movies" },
+{ type: "series", id: "gdrive_recent_series", name: "Recently Added Series" },
+{ type: "movie", id: "gdrive_search", name: "GDrive Search", extra: [{ name: "search", isRequired: true }] }
+],
+resources: [
+{ name: "stream", types: ["movie", "series", "anime"] },
+{ name: "catalog", types: ["movie", "series"] },
+{ name: "meta", types: ["movie", "series"] }
+],
+types: ["movie", "series", "anime"],
+};
+return new Response(JSON.stringify(manifest), { headers: HEADERS });
+}
+const streamMatch = REGEX.stream.exec(url.pathname);
+const catalogMatch = REGEX.catalog.exec(url.pathname);
+const metaMatch = REGEX.meta.exec(url.pathname);
+const playbackMatch = REGEX.playback.exec(url.pathname);
+if (!streamMatch && !catalogMatch && !metaMatch && !playbackMatch) {
+return new Response("Not Found", { status: 404, headers: HEADERS });
+}
+try {
+// --- PLAYBACK PROXY ---
+if (playbackMatch) {
+return await handlePlayback(request, env, playbackMatch[1], playbackMatch[2]);
+}
+// --- META ---
+if (metaMatch) {
+const fullId = decodeURIComponent(metaMatch[2]);
+let fileId = fullId.startsWith("gdrive:") ? fullId.replace("gdrive:", "") : fullId;
+if (fileId.includes(":")) fileId = fileId.split(":")[0];
+const accessToken = await getAccessToken(env);
+const file = await getFileMeta(fileId, accessToken);
+if (!file) return new Response(JSON.stringify({ meta: null }), { headers: HEADERS });
+const parsed = parseFile(file);
+const meta = {
+id: `gdrive:${file.id}`,
+name: parsed.name,
+type: parsed.type,
+posterShape: parsed.type === "series" ? "poster" : "landscape",
+poster: file.thumbnailLink || "",
+background: file.thumbnailLink || "",
+description: `Size: ${parsed.formattedSize}
+Quality: ${parsed.quality}
+Resolution: ${parsed.resolution}`,
+};
+if (parsed.type === "series") {
+meta.videos = [{
+id: `gdrive:${file.id}:${parsed.season}:${parsed.episode}`,
+title: `S${String(parsed.season).padStart(2, '0')}E${String(parsed.episode).padStart(2, '0')}`,
+season: parsed.season,
+episode: parsed.episode,
+}];
+}
+return new Response(JSON.stringify({ meta }), { headers: HEADERS });
+}
+// --- CATALOG ---
+if (catalogMatch) {
+const catalogId = catalogMatch[2];
+const searchTerm = catalogMatch[4] ? decodeURIComponent(catalogMatch[4]) : "";
+if (catalogId === "gdrive_recent_movies" || catalogId === "gdrive_recent_series") {
+const query = `trashed=false and mimeType contains 'video/' and not name contains 'trailer' and not name contains 'sample'`;
+const { files } = await fetchFiles(query, env, "createdTime desc", 'catalog');
+const metas = files
+.map(f => parseFile(f))
+.filter(p => catalogId === "gdrive_recent_movies" ? p.type === "movie" : p.type === "series")
+.slice(0, 50)
+.map(p => ({
+id: `gdrive:${p.id}`,
+name: p.name,
+type: p.type,
+posterShape: "landscape",
+description: `Size: ${p.formattedSize} | ${p.quality} | ${p.resolution}`
+}));
+return new Response(JSON.stringify({ metas }), { headers: HEADERS });
+}
+if (catalogId === "gdrive_search") {
+if (!searchTerm) return new Response(JSON.stringify({ metas: [] }), { headers: HEADERS });
+const query = `trashed=false and mimeType contains 'video/' and not name contains 'trailer' and name contains '${escapeDriveQuery(searchTerm)}'`;
+const { files } = await fetchFiles(query, env, null, 'catalog');
+const metas = files.map(f => {
+const p = parseFile(f);
+return {
+id: `gdrive:${p.id}`,
+name: p.name,
+type: "movie",
+posterShape: "landscape",
+description: `${p.formattedSize} • ${p.resolution}`
+};
+});
+return new Response(JSON.stringify({ metas }), { headers: HEADERS });
+}
+return new Response(JSON.stringify({ metas: [] }), { headers: HEADERS });
+}
+// --- STREAM ---
+if (streamMatch) {
+const type = streamMatch[1];
+const fullId = decodeURIComponent(streamMatch[2]);
+if (fullId.startsWith("gdrive:")) {
+let fileId = fullId.replace("gdrive:", "").split(":")[0];
+const accessToken = await getAccessToken(env, !CONFIG.proxiedPlayback);
+const file = await getFileMeta(fileId, accessToken);
+if (!file) return new Response(JSON.stringify({ streams: [] }), { headers: HEADERS });
+const parsed = parseFile(file);
+return new Response(JSON.stringify({ streams: [buildStreamObject(parsed, playbackUrl, accessToken)] }), { headers: HEADERS });
+}
+let season, episode;
+if (fullId.includes(":")) {
+const parts = fullId.split(":");
+season = parts.length >= 2 ? parseInt(parts[parts.length - 2]) : undefined;
+episode = parts.length >= 1 ? parseInt(parts[parts.length - 1]) : undefined;
+}
+const metaData = await getMetadata(type, fullId);
+if (!metaData) return new Response(JSON.stringify({ streams: [] }), { headers: HEADERS });
+const streamRequest = {
+type,
+metadata: { name: metaData.name, year: metaData.year },
+season,
+episode
+};
+const query = buildStreamQuery(streamRequest);
+const { files } = await fetchFiles(query, env, null, 'stream');
+// Direct mode hands the token to the player, so give it a brand-new one (full ~60 min of life).
+const accessToken = await getAccessToken(env, !CONFIG.proxiedPlayback);
+let parsedFiles = files.map(f => parseFile(f));
+if (streamRequest.type === "series" && streamRequest.season && streamRequest.episode) {
+parsedFiles = parsedFiles.filter(p =>
+p.type === "series" && p.season === streamRequest.season && p.episode === streamRequest.episode
+);
+}
+const sortedFiles = sortStreams(parsedFiles);
+const streams = sortedFiles.map(parsed => buildStreamObject(parsed, playbackUrl, accessToken));
+return new Response(JSON.stringify({ streams }), { headers: HEADERS });
+}
+} catch (error) {
+console.error("Worker Error:", error);
+const errorMsg = error.message.includes("quota") || error.message.includes("403")
+? "⚠️ Google Drive rate limited. Please wait a moment."
+: error.message;
+if (streamMatch) return new Response(JSON.stringify({ streams: [{ name: "⚠️ Error", description: errorMsg }] }), { status: 200, headers: HEADERS });
+if (playbackMatch) return new Response(errorMsg, { status: 502, headers: { "Content-Type": "text/plain", "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" } });
+return new Response(JSON.stringify({ error: errorMsg }), { status: 500, headers: HEADERS });
+}
+}
+export default {
+async fetch(request, env, ctx) {
+return handleRequest(request, env, ctx);
+}
+};
+</script>
 
-  const url = new URL(request.url);
-  const playbackUrl = url.origin + "/playback";
+<script>
+// Explicitly set to the requested GitHub Pages URL
+const redirectUri = "https://wmaeve07.github.io/nuvio-gdrive-addon/setup.html";
+document.getElementById("currentRedirectUri").innerText = redirectUri;
 
-  if (url.pathname === "/manifest.json" || url.pathname === "/") {
-    const manifest = {
-      id: "gdrive.custom.v5.1",
-      version: "5.1.0",
-      name: CONFIG.addonName,
-      description: "Fast, cached, auto-sorted Google Drive catalog for Stremio/Nuvio.",
-      catalogs: [
-        { type: "movie", id: "gdrive_recent_movies", name: "Recently Added Movies" },
-        { type: "series", id: "gdrive_recent_series", name: "Recently Added Series" },
-        { type: "movie", id: "gdrive_search", name: "GDrive Search", extra: [{ name: "search", isRequired: true }] }
-      ],
-      resources: [
-        { name: "stream", types: ["movie", "series", "anime"] },
-        { name: "catalog", types: ["movie", "series"] },
-        { name: "meta", types: ["movie", "series"] }
-      ],
-      types: ["movie", "series", "anime"],
-    };
-    return new Response(JSON.stringify(manifest), { headers: HEADERS });
-  }
+let selectedFolderIds = [];
+let baseCode = "";
 
-  const streamMatch = REGEX.stream.exec(url.pathname);
-  const catalogMatch = REGEX.catalog.exec(url.pathname);
-  const metaMatch = REGEX.meta.exec(url.pathname);
-  const playbackMatch = REGEX.playback.exec(url.pathname);
-
-  if (!streamMatch && !catalogMatch && !metaMatch && !playbackMatch) {
-    return new Response("Not Found", { status: 404, headers: HEADERS });
-  }
-
-  try {
-    if (playbackMatch) {
-      const fileId = playbackMatch[1];
-      const accessToken = await getAccessToken(env);
-      const streamUrl = API.DRIVE_STREAM.replace("{fileId}", fileId);
-      const range = request.headers.get("Range") || "bytes=0-";
-
-      const driveResponse = await fetchWithRetry(streamUrl, {
-        headers: { 
-          Authorization: \`Bearer \${accessToken}\`, 
-          Range: range, 
-          "Accept-Encoding": "identity" 
-        }
-      });
-
-      if (!driveResponse.ok) throw new Error(\`Drive error: \${driveResponse.status}\`);
-
-      const responseHeaders = {
-        "Content-Range": driveResponse.headers.get("Content-Range") || "",
-        "Content-Length": driveResponse.headers.get("Content-Length") || "",
-        "Content-Type": driveResponse.headers.get("Content-Type") || "video/*",
-        "Accept-Ranges": "bytes",
-        "Access-Control-Allow-Origin": "*",
-      };
-      return new Response(driveResponse.body, {
-        status: driveResponse.status,
-        headers: responseHeaders
-      });
-    }
-
-    if (metaMatch) {
-      const fullId = decodeURIComponent(metaMatch[2]);
-      let fileId = fullId.startsWith("gdrive:") ? fullId.replace("gdrive:", "") : fullId;
-      if (fileId.includes(":")) fileId = fileId.split(":")[0];
-
-      const accessToken = await getAccessToken(env);
-      const file = await fetchWithRetry(new URL(API.DRIVE_FILE.replace("{fileId}", fileId)).toString(), {
-        headers: { Authorization: \`Bearer \${accessToken}\` }
-      }).then(r => r.json());
-
-      if (!file) return new Response(JSON.stringify({ meta: null }), { headers: HEADERS });
-      
-      const parsed = parseFile(file);
-      const meta = {
-        id: \`gdrive:\${file.id}\`,
-        name: parsed.name,
-        type: parsed.type,
-        posterShape: parsed.type === "series" ? "poster" : "landscape",
-        poster: file.thumbnailLink || "",
-        background: file.thumbnailLink || "",
-        description: \`Size: \${parsed.formattedSize}\\nQuality: \${parsed.quality}\\nResolution: \${parsed.resolution}\`,
-      };
-      
-      if (parsed.type === "series") {
-        meta.videos = [{
-          id: \`gdrive:\${file.id}:\${parsed.season}:\${parsed.episode}\`,
-          title: \`S\${String(parsed.season).padStart(2, '0')}E\${String(parsed.episode).padStart(2, '0')}\`,
-          season: parsed.season,
-          episode: parsed.episode,
-        }];
-      }
-      return new Response(JSON.stringify({ meta }), { headers: HEADERS });
-    }
-
-    if (catalogMatch) {
-      const catalogId = catalogMatch[2];
-      const searchTerm = catalogMatch[4] ? decodeURIComponent(catalogMatch[4]) : "";
-
-      if (catalogId === "gdrive_recent_movies" || catalogId === "gdrive_recent_series") {
-        const query = "trashed=false and mimeType contains 'video/' and not name contains 'trailer' and not name contains 'sample'";
-        const { files } = await fetchFiles(query, env, "createdTime desc", 'catalog');
-        
-        const metas = files
-          .map(f => parseFile(f))
-          .filter(p => catalogId === "gdrive_recent_movies" ? p.type === "movie" : p.type === "series")
-          .slice(0, 50)
-          .map(p => ({
-            id: \`gdrive:\${p.id}\`,
-            name: p.name,
-            type: p.type,
-            posterShape: "landscape",
-            description: \`Size: \${p.formattedSize} | \${p.quality} | \${p.resolution}\`
-          }));
-        return new Response(JSON.stringify({ metas }), { headers: HEADERS });
-      }
-
-      if (catalogId === "gdrive_search") {
-        if (!searchTerm) return new Response(JSON.stringify({ metas: [] }), { headers: HEADERS });
-        const query = \`trashed=false and mimeType contains 'video/' and not name contains 'trailer' and name contains '\${escapeDriveQuery(searchTerm)}'\`;
-        const { files } = await fetchFiles(query, env, null, 'catalog');
-        const metas = files.map(f => {
-          const p = parseFile(f);
-          return {
-            id: \`gdrive:\${p.id}\`,
-            name: p.name,
-            type: "movie",
-            posterShape: "landscape",
-            description: \`\${p.formattedSize} • \${p.resolution}\`
-          };
-        });
-        return new Response(JSON.stringify({ metas }), { headers: HEADERS });
-      }
-      return new Response(JSON.stringify({ metas: [] }), { headers: HEADERS });
-    }
-
-    if (streamMatch) {
-      const type = streamMatch[1];
-      const fullId = decodeURIComponent(streamMatch[2]);
-
-      if (fullId.startsWith("gdrive:")) {
-        let fileId = fullId.replace("gdrive:", "").split(":")[0];
-        const accessToken = await getAccessToken(env);
-        const file = await fetchWithRetry(new URL(API.DRIVE_FILE.replace("{fileId}", fileId)).toString(), {
-          headers: { Authorization: \`Bearer \${accessToken}\` }
-        }).then(r => r.json());
-        
-        if (!file) return new Response(JSON.stringify({ streams: [] }), { headers: HEADERS });
-        const parsed = parseFile(file);
-        return new Response(JSON.stringify({ streams: [buildStreamObject(parsed, playbackUrl, accessToken)] }), { headers: HEADERS });
-      }
-
-      let season, episode;
-      if (fullId.includes(":")) {
-        const parts = fullId.split(":");
-        season = parts.length >= 2 ? parseInt(parts[parts.length - 2]) : undefined;
-        episode = parts.length >= 1 ? parseInt(parts[parts.length - 1]) : undefined;
-      }
-
-      const metaData = await getMetadata(type, fullId);
-      if (!metaData) return new Response(JSON.stringify({ streams: [] }), { headers: HEADERS });
-
-      const streamRequest = {
-        type,
-        metadata: { name: metaData.name, year: metaData.year },
-        season,
-        episode
-      };
-
-      const query = buildStreamQuery(streamRequest);
-      const { files, accessToken } = await fetchFiles(query, env, null, 'stream');
-
-      let parsedFiles = files.map(f => parseFile(f));
-
-      if (streamRequest.type === "series" && streamRequest.season && streamRequest.episode) {
-        parsedFiles = parsedFiles.filter(p => 
-          p.type === "series" && p.season === streamRequest.season && p.episode === streamRequest.episode
-        );
-      }
-
-      const sortedFiles = sortStreams(parsedFiles);
-      const streams = sortedFiles.map(parsed => buildStreamObject(parsed, playbackUrl, accessToken));
-
-      return new Response(JSON.stringify({ streams }), { headers: HEADERS });
-    }
-
-  } catch (error) {
-    console.error("Worker Error:", error);
-    const errorMsg = error.message.includes("quota") || error.message.includes("403") 
-      ? "⚠️ Google Drive rate limited. Please wait a moment." 
-      : error.message;
-    
-    if (streamMatch) return new Response(JSON.stringify({ streams: [{ name: "⚠️ Error", description: errorMsg }] }), { status: 200, headers: HEADERS });
-    return new Response(JSON.stringify({ error: errorMsg }), { status: 500, headers: HEADERS });
-  }
+function goToStep(stepNum) {
+document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+document.getElementById('step' + stepNum).classList.add('active');
+document.querySelectorAll('.progress-step').forEach((p, i) => { p.classList.toggle('active', i < stepNum); });
+const fill = document.getElementById('progressFill');
+fill.style.width = ((stepNum - 1) / 3 * 100) + '%';
+window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-export default {
-  async fetch(request, env, ctx) {
-    return handleRequest(request, env, ctx);
-  }
-};`;
+function saveCredentials() {
+sessionStorage.setItem("saved_client_id", document.getElementById("clientId").value.trim());
+sessionStorage.setItem("saved_client_secret", document.getElementById("clientSecret").value.trim());
+}
 
-        function goToStep(stepNum) {
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.getElementById('step' + stepNum).classList.add('active');
-            document.querySelectorAll('.progress-step').forEach((p, i) => { p.classList.toggle('active', i < stepNum); });
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+function startOAuthFlow() {
+const clientId = document.getElementById("clientId").value.trim();
+if (!clientId) {
+showStatus("Please enter your Client ID first.", "error");
+return;
+}
+saveCredentials();
+const scope = encodeURIComponent("https://www.googleapis.com/auth/drive.readonly");
+const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
+window.location.href = authUrl;
+}
 
-        function saveCredentials() {
-            sessionStorage.setItem("saved_client_id", document.getElementById("clientId").value.trim());
-            sessionStorage.setItem("saved_client_secret", document.getElementById("clientSecret").value.trim());
-        }
+async function handleRedirectCode() {
+const params = new URLSearchParams(window.location.search);
+const code = params.get("code");
+if (!code) return;
+const clientId = sessionStorage.getItem("saved_client_id") || "";
+const clientSecret = sessionStorage.getItem("saved_client_secret") || "";
+if (clientId) document.getElementById("clientId").value = clientId;
+if (clientSecret) document.getElementById("clientSecret").value = clientSecret;
+if (!clientId || !clientSecret) {
+showStatus("Authorization code received. Enter your Client Secret to complete token retrieval.", "error");
+return;
+}
+showStatus("Exchanging authorization code for token...", "success");
+try {
+const res = await fetch("https://oauth2.googleapis.com/token", {
+method: "POST",
+headers: { "Content-Type": "application/x-www-form-urlencoded" },
+body: new URLSearchParams({
+code: code,
+client_id: clientId,
+client_secret: clientSecret,
+redirect_uri: redirectUri,
+grant_type: "authorization_code",
+})
+});
+const data = await res.json();
+if (!res.ok) throw new Error(data.error_description || data.error || "Token exchange failed");
+if (data.refresh_token) {
+document.getElementById("refreshToken").value = data.refresh_token;
+showStatus("Successfully retrieved Refresh Token!", "success");
+generateCode();
+} else {
+showStatus("No refresh token returned. Revoke access from your Google Account security settings and re-authorize.", "error");
+}
+window.history.replaceState({}, document.title, window.location.pathname);
+} catch (err) {
+showStatus("Failed to exchange code: " + err.message, "error");
+}
+}
 
-        function startOAuthFlow() {
-            const clientId = document.getElementById("clientId").value.trim();
-            if (!clientId) {
-                showStatus("Please enter your Client ID first.", "error");
-                return;
-            }
-            saveCredentials();
-            const scope = encodeURIComponent("https://www.googleapis.com/auth/drive.readonly");
-            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
-            window.location.href = authUrl;
-        }
+async function testConnection() {
+const clientId = document.getElementById("clientId").value.trim();
+const clientSecret = document.getElementById("clientSecret").value.trim();
+const refreshToken = document.getElementById("refreshToken").value.trim();
+if (!clientId || !clientSecret || !refreshToken) {
+showStatus("Client ID, Client Secret, and Refresh Token are all required.", "error");
+return;
+}
+showStatus("Connecting to Google Drive API...", "success");
+try {
+const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+method: "POST",
+headers: { "Content-Type": "application/x-www-form-urlencoded" },
+body: new URLSearchParams({
+client_id: clientId,
+client_secret: clientSecret,
+refresh_token: refreshToken,
+grant_type: "refresh_token",
+})
+});
+const tokenData = await tokenRes.json();
+if (!tokenRes.ok) throw new Error(tokenData.error_description || "Invalid credentials");
+const accessToken = tokenData.access_token;
+const driveRes = await fetch(
+"https://www.googleapis.com/drive/v3/files?q=mimeType%3D'application%2Fvnd.google-apps.folder'+and+trashed%3Dfalse&pageSize=30&fields=files(id%2Cname)",
+{ headers: { Authorization: `Bearer ${accessToken}` } }
+);
+const driveData = await driveRes.json();
+if (!driveRes.ok) throw new Error(driveData.error?.message || "Failed to read drive directory");
+showStatus(`✅ Connected! Found ${driveData.files.length} folder(s). Check any you want scanned:`, "success");
+const folderList = document.getElementById("folderList");
+folderList.innerHTML = "";
+driveData.files.forEach(folder => {
+const item = document.createElement("label");
+item.className = "folder-item";
+item.innerHTML = `
+<input type="checkbox" value="${folder.id}" onchange="toggleFolder(this)">
+<span>📁 <strong>${folder.name}</strong> <code style="color:#a0a0b0; font-size:0.75rem;">(${folder.id})</code></span>
+`;
+folderList.appendChild(item);
+});
+document.getElementById("folderWrapper").classList.remove("hidden");
+document.getElementById("folderList").style.display = "block";
+} catch (err) {
+document.getElementById("folderWrapper").classList.add("hidden");
+showStatus("Connection Failed: " + err.message, "error");
+}
+}
 
-        async function handleRedirectCode() {
-            const params = new URLSearchParams(window.location.search);
-            const code = params.get("code");
-            if (!code) return;
+function toggleFolder(checkbox) {
+if (checkbox.checked) {
+if (!selectedFolderIds.includes(checkbox.value)) selectedFolderIds.push(checkbox.value);
+} else {
+selectedFolderIds = selectedFolderIds.filter(id => id !== checkbox.value);
+}
+generateCode();
+}
 
-            const clientId = sessionStorage.getItem("saved_client_id") || "";
-            const clientSecret = sessionStorage.getItem("saved_client_secret") || "";
+function selectAllFolders(select) {
+selectedFolderIds = [];
+document.querySelectorAll('#folderList input[type="checkbox"]').forEach(cb => {
+cb.checked = select;
+if (select) selectedFolderIds.push(cb.value);
+});
+generateCode();
+}
 
-            if (clientId) document.getElementById("clientId").value = clientId;
-            if (clientSecret) document.getElementById("clientSecret").value = clientSecret;
+function showStatus(message, type) {
+const box = document.getElementById("statusBox");
+box.className = "status " + type;
+box.innerText = message;
+}
 
-            if (!clientId || !clientSecret) {
-                showStatus("Authorization code received. Enter your Client Secret to complete token retrieval.", "error");
-                return;
-            }
+function generateCode() {
+const cid = document.getElementById('clientId').value.trim();
+const csec = document.getElementById('clientSecret').value.trim();
+const rtok = document.getElementById('refreshToken').value.trim();
+let code = baseCode;
+if (cid) code = code.replace('CLIENT_ID_PLACEHOLDER', cid);
+if (csec) code = code.replace('CLIENT_SECRET_PLACEHOLDER', csec);
+if (rtok) code = code.replace('REFRESH_TOKEN_PLACEHOLDER', rtok);
+const folderArrStr = JSON.stringify(selectedFolderIds);
+code = code.replace('DRIVE_FOLDERS_PLACEHOLDER', folderArrStr);
+const codeBlock = document.getElementById('codeOutput');
+codeBlock.textContent = code;
+// Trigger Prism syntax highlighting
+if (window.Prism) {
+Prism.highlightElement(codeBlock);
+}
+}
 
-            showStatus("Exchanging authorization code for token...", "success");
+function copyCode() {
+navigator.clipboard.writeText(document.getElementById('codeOutput').textContent).then(() => {
+const msg = document.getElementById('copyMsg');
+msg.style.display = 'inline';
+setTimeout(() => msg.style.display = 'none', 2000);
+});
+}
 
-            try {
-                const res = await fetch("https://oauth2.googleapis.com/token", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: new URLSearchParams({
-                        code: code,
-                        client_id: clientId,
-                        client_secret: clientSecret,
-                        redirect_uri: redirectUri,
-                        grant_type: "authorization_code",
-                    })
-                });
+function downloadCode() {
+const code = document.getElementById('codeOutput').textContent;
+const blob = new Blob([code], { type: 'text/javascript' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = 'worker.js';
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+URL.revokeObjectURL(url);
+}
 
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error_description || data.error || "Token exchange failed");
+function copyText(text, btn) {
+navigator.clipboard.writeText(text).then(() => {
+const original = btn.textContent;
+btn.textContent = 'Copied!';
+setTimeout(() => btn.textContent = original, 1500);
+});
+}
 
-                if (data.refresh_token) {
-                    document.getElementById("refreshToken").value = data.refresh_token;
-                    showStatus("Successfully retrieved Refresh Token!", "success");
-                    generateCode();
-                } else {
-                    showStatus("No refresh token returned. Revoke access from your Google Account security settings and re-authorize.", "error");
-                }
+function updateInstallerLinks() {
+let val = document.getElementById("deployedWorkerUrl").value.trim();
+const container = document.getElementById("installButtonContainer");
+if (!val) {
+container.classList.add("hidden");
+return;
+}
+val = val.replace(/\/manifest\.json$/, "").replace(/\/$/, "");
+const manifestUrl = `${val}/manifest.json`;
+const stremioUrl = manifestUrl.replace(/^https?:\/\//i, "stremio://");
+document.getElementById("stremioDeepLink").href = stremioUrl;
+container.classList.remove("hidden");
+}
 
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (err) {
-                showStatus("Failed to exchange code: " + err.message, "error");
-            }
-        }
+function copyManifestLink() {
+let val = document.getElementById("deployedWorkerUrl").value.trim().replace(/\/manifest\.json$/, "").replace(/\/$/, "");
+const manifestUrl = `${val}/manifest.json`;
+navigator.clipboard.writeText(manifestUrl).then(() => alert("Manifest link copied!"));
+}
 
-        async function testConnection() {
-            const clientId = document.getElementById("clientId").value.trim();
-            const clientSecret = document.getElementById("clientSecret").value.trim();
-            const refreshToken = document.getElementById("refreshToken").value.trim();
-
-            if (!clientId || !clientSecret || !refreshToken) {
-                showStatus("Client ID, Client Secret, and Refresh Token are all required.", "error");
-                return;
-            }
-
-            showStatus("Connecting to Google Drive API...", "success");
-
-            try {
-                const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: new URLSearchParams({
-                        client_id: clientId,
-                        client_secret: clientSecret,
-                        refresh_token: refreshToken,
-                        grant_type: "refresh_token",
-                    })
-                });
-
-                const tokenData = await tokenRes.json();
-                if (!tokenRes.ok) throw new Error(tokenData.error_description || "Invalid credentials");
-
-                const accessToken = tokenData.access_token;
-                const driveRes = await fetch(
-                    "https://www.googleapis.com/drive/v3/files?q=mimeType%3D'application%2Fvnd.google-apps.folder'+and+trashed%3Dfalse&pageSize=30&fields=files(id%2Cname)",
-                    { headers: { Authorization: `Bearer ${accessToken}` } }
-                );
-
-                const driveData = await driveRes.json();
-                if (!driveRes.ok) throw new Error(driveData.error?.message || "Failed to read drive directory");
-
-                showStatus(`✅ Connected! Found ${driveData.files.length} folder(s). Check any you want scanned:`, "success");
-
-                const folderList = document.getElementById("folderList");
-                folderList.innerHTML = "";
-                driveData.files.forEach(folder => {
-                    const item = document.createElement("label");
-                    item.className = "folder-item";
-                    item.innerHTML = `
-                        <input type="checkbox" value="${folder.id}" onchange="toggleFolder(this)">
-                        <span>📁 <strong>${folder.name}</strong> <code style="color:#a0a0b0; font-size:0.75rem;">(${folder.id})</code></span>
-                    `;
-                    folderList.appendChild(item);
-                });
-                document.getElementById("folderWrapper").classList.remove("hidden");
-                document.getElementById("folderList").style.display = "block";
-            } catch (err) {
-                document.getElementById("folderWrapper").classList.add("hidden");
-                showStatus("Connection Failed: " + err.message, "error");
-            }
-        }
-
-        function toggleFolder(checkbox) {
-            if (checkbox.checked) {
-                if (!selectedFolderIds.includes(checkbox.value)) selectedFolderIds.push(checkbox.value);
-            } else {
-                selectedFolderIds = selectedFolderIds.filter(id => id !== checkbox.value);
-            }
-            generateCode();
-        }
-
-        function showStatus(message, type) {
-            const box = document.getElementById("statusBox");
-            box.className = "status " + type;
-            box.innerText = message;
-        }
-
-        function generateCode() {
-            const cid = document.getElementById('clientId').value.trim();
-            const csec = document.getElementById('clientSecret').value.trim();
-            const rtok = document.getElementById('refreshToken').value.trim();
-            
-            let code = baseCode;
-            if (cid) code = code.replace('CLIENT_ID_PLACEHOLDER', cid);
-            if (csec) code = code.replace('CLIENT_SECRET_PLACEHOLDER', csec);
-            if (rtok) code = code.replace('REFRESH_TOKEN_PLACEHOLDER', rtok);
-
-            const folderArrStr = JSON.stringify(selectedFolderIds);
-            code = code.replace('DRIVE_FOLDERS_PLACEHOLDER', folderArrStr);
-
-            const codeBlock = document.getElementById('codeOutput');
-            codeBlock.textContent = code;
-            
-            // Trigger Prism syntax highlighting
-            if (window.Prism) {
-                Prism.highlightElement(codeBlock);
-            }
-        }
-
-        function copyCode() {
-            navigator.clipboard.writeText(document.getElementById('codeOutput').textContent).then(() => {
-                const msg = document.getElementById('copyMsg');
-                msg.style.display = 'inline';
-                setTimeout(() => msg.style.display = 'none', 2000);
-            });
-        }
-
-        function copyText(text, btn) {
-            navigator.clipboard.writeText(text).then(() => {
-                const original = btn.textContent;
-                btn.textContent = 'Copied!';
-                setTimeout(() => btn.textContent = original, 1500);
-            });
-        }
-
-        function updateInstallerLinks() {
-            let val = document.getElementById("deployedWorkerUrl").value.trim();
-            const container = document.getElementById("installButtonContainer");
-            if (!val) {
-                container.classList.add("hidden");
-                return;
-            }
-
-            val = val.replace(/\/manifest\.json$/, "").replace(/\/$/, "");
-            const manifestUrl = `${val}/manifest.json`;
-            const stremioUrl = manifestUrl.replace(/^https?:\/\//i, "stremio://");
-
-            document.getElementById("stremioDeepLink").href = stremioUrl;
-            container.classList.remove("hidden");
-        }
-
-        function copyManifestLink() {
-            let val = document.getElementById("deployedWorkerUrl").value.trim().replace(/\/manifest\.json$/, "").replace(/\/$/, "");
-            const manifestUrl = `${val}/manifest.json`;
-            navigator.clipboard.writeText(manifestUrl).then(() => alert("Manifest link copied!"));
-        }
-
-        window.addEventListener("DOMContentLoaded", () => {
-            handleRedirectCode();
-            generateCode();
-        });
-    </script>
+window.addEventListener("DOMContentLoaded", () => {
+// Load the base code from the hidden template (avoids messy string escaping)
+baseCode = document.getElementById('baseCodeTemplate').textContent;
+handleRedirectCode();
+generateCode();
+});
+</script>
 </body>
 </html>
